@@ -1,6 +1,6 @@
 ![](./repo-banner.png)
 
-<h1 align="center">Add Flag Emojis to Windows 11</h1>
+<h1 align="center">Add Country Flag Emojis to Windows 11</h1>
 
 <div align="center">
   <p>
@@ -16,15 +16,15 @@
   </p>
 </div>
 
-<h2 align="center">This font adds flag emojis to Windows 11, while keeping all the Win11's original emojis! 🇯🇵 🇩🇪 🇨🇳 🇪🇸 🇬🇧 🎨🔥😭💀🥹✨</h2>
+<h2 align="center">This font adds <b>country flag emojis</b> to Windows 11, while keeping all the <b>Win11's original emojis</b>! 🇯🇵 🇩🇪 🇨🇳 🇪🇸 🇬🇧 🎨🔥😭💀🥹✨</h2>
 
 
 
-Unlike literally any other platform or OS, Windows never had flag emojis, and that always irked me a little bit. Having to guess what flag someone else is trying to send to just two letters isn't a great user experience, you know. And I always just kinda sighed at it, helplessly.
+Unlike literally any other platform or OS, Windows never had flag emojis, and that always irked me a little bit. Having to guess what flag someone else is trying to send by just two letters isn't a great user experience, you know. And I always just kinda sighed at it, helplessly.
 
 But not today... Today I woke up, and the absence of flag emojis in Windows has triggered me like never before, and so I've spent over 14 hours hyperfocused on this task of bringing flag emojis to Windows (without replacing *all* the emojis, that is, like some other projects did).
 
-And now you too can say "No!" to Windows, "I want the flag emojis that everyone else has!", download and install [this font](https://github.com/Chasmical/windows-flags/releases/download/v1.0.0/Segoe.UI.Emoji.with.Twemoji.flags.ttf), restart your PC, and finally get to enjoy the full emoji experience on Windows! Here's a quick test for after you install the font: 🇯🇵 🇰🇷 🇩🇪 🇨🇳 🇺🇸 🇫🇷 🇪🇸 🇮🇹 🇷🇺 🇬🇧.
+And now you too can say *"No!"* to Windows, *"I want the flag emojis that everyone else has!"*, download and install [this font](https://github.com/Chasmical/flag-emojis-for-windows/releases/download/v1.0.0/Segoe.UI.Emoji.with.Twemoji.flags.ttf), restart your PC, and finally get to enjoy the full emoji experience on Windows! Here's a quick test for after you install the font: 🇯🇵 🇰🇷 🇩🇪 🇨🇳 🇺🇸 🇫🇷 🇪🇸 🇮🇹 🇷🇺 🇬🇧.
 
 &nbsp;
 
@@ -34,7 +34,7 @@ The font is based on whatever copy of Segoe UI Emoji I had on my PC. I've simply
 
 ## Installation
 
-### [Download this font](https://github.com/Chasmical/windows-flags/releases/download/v1.0.0/Segoe.UI.Emoji.with.Twemoji.flags.ttf) and install it.
+### [Download this font](https://github.com/Chasmical/flag-emojis-for-windows/releases/download/v1.0.0/Segoe.UI.Emoji.with.Twemoji.flags.ttf) and install it.
 
 ### Restart your PC to apply changes.
 
@@ -62,7 +62,7 @@ git, Python/pip, LINQPad (64x, not 32x!), 8-16 Gb of RAM, 1 Gb of disk space.
 
    When you install the new font, the one in `C:\Windows\Fonts` should remain unchanged, but we'll back it up just in case.
 
-2. Download the [16.0.1 Twemoji font](https://github.com/quarrel/broken-flag-emojis-win11-twemoji/blob/main/Twemoji-16.0.1-SVG-COLR1.ttf), and put it in your working directory:
+2. Download the [16.0.1 Twemoji font](https://github.com/quarrel/broken-flag-emojis-win11-twemoji/blob/main/Twemoji-16.0.1-SVG-COLR1.ttf) (from [quarrel/broken-flag-emojis-win11-twemoji](https://github.com/quarrel/broken-flag-emojis-win11-twemoji) repository), and put it in your working directory:
 
    ```ps1
    Invoke-WebRequest -Uri "https://github.com/quarrel/broken-flag-emojis-win11-twemoji/raw/refs/heads/main/Twemoji-16.0.1-SVG-COLR1.ttf" -OutFile twemoji.ttf
@@ -117,7 +117,7 @@ git, Python/pip, LINQPad (64x, not 32x!), 8-16 Gb of RAM, 1 Gb of disk space.
    fonttools.exe ttx merged.ttx
    ```
 
-10. And now just install the font, and everything should work!
+10. And now just install the `merged.ttf` font, and everything should work!
 
 
 
@@ -127,7 +127,7 @@ The scripts I wrote are a bit janky and disorganized, since I've had to try so m
 
 If you want to add emojis to Segoe UI Emoji from some other font, here's a list of resources that I found useful:
 
-- [`fontTools ttx`](https://fonttools.readthedocs.io/en/latest/ttx.html) - can decompile TTF into a readable and editable XML, and recompiles it back losslessly.
+- [fontTools ttx](https://fonttools.readthedocs.io/en/latest/ttx.html) - can decompile TTF into a readable and editable XML, and recompiles it back losslessly.
 - [OpenType's spec on Microsoft Learn](https://learn.microsoft.com/en-us/typography/opentype/spec/) explains the overall structure of a TTF file and its tables, and what different type ids mean, and etc.
 - [GSUB docs on FontForge](https://fontforge.org/docs/techref/gposgsub.html) clarifies some stuff about substitution lookups.
 - [HarfBuzz](https://harfbuzz.github.io/utilities.html#utilities-command-line-hbview) brought the project to the finish line! It not only renders font characters into the terminal, but also shows the entire textshaping process (run with option `-V`). I was stuck for a while on script and feature switches, not realizing that they disable rendering the ligatures in some places.

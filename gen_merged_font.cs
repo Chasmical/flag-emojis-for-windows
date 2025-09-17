@@ -1,4 +1,4 @@
-var dir = @"D:\repos\windows-flags";
+var dir = @"D:\repos\flag-emojis-for-windows";
 
 // 's' prefix - segoe ui emoji, 't' prefix - twemoji
 var sdoc = new XmlDocument();
@@ -315,8 +315,7 @@ foreach (var svgdoc in tsvg.ChildNodes.OfType<XmlElement>()) {
 var slookups = sdoc.SelectSingleNode("/ttFont/GSUB/LookupList")!;
 var tlookups = tdoc.SelectSingleNode("/ttFont/GSUB/LookupList")!;
 var lookupCounter = slookups.ChildNodes.OfType<XmlElement>().Count();
-XmlElement? sLigaFeature = sdoc.SelectSingleNode("/ttFont/GSUB/FeatureList/FeatureRecord[FeatureTag/@value='liga']/Feature") as XmlElement;
-XmlElement? sLatnScript = sdoc.SelectSingleNode("/ttFont/GSUB/ScriptList/ScriptRecord[ScriptTag/@value='latn']/Script/DefaultLangSys") as XmlElement;
+XmlElement? sCcmpFeature = (sdoc.SelectSingleNode("/ttFont/GSUB/FeatureList/FeatureRecord[FeatureTag/@value='ccmp']/Feature") as XmlElement)!;
 
 foreach (var lookup in tlookups.ChildNodes.OfType<XmlElement>()) {
     lookup.SetAttribute("index", (lookupCounter++).ToString());
@@ -358,11 +357,11 @@ foreach (var lookup in tlookups.ChildNodes.OfType<XmlElement>()) {
 //			sLatnScript = langSys;
 //		}
 
-		// var index = sdoc.CreateElement("LookupListIndex");
-		// var indexIndex = sLigaFeature.ChildNodes.OfType<XmlElement>().Count();
-		// index.SetAttribute("index", indexIndex.ToString());
-		// index.SetAttribute("value", lookup.GetAttribute("index"));
-		// sLigaFeature.AppendChild(index);
+		 var index = sdoc.CreateElement("LookupListIndex");
+		 var indexIndex = sCcmpFeature.ChildNodes.OfType<XmlElement>().Count();
+		 index.SetAttribute("index", indexIndex.ToString());
+		 index.SetAttribute("value", lookup.GetAttribute("index"));
+		 sCcmpFeature.AppendChild(index);
 
 		// foreach (var script in sdoc.SelectNodes("/ttFont/GSUB/ScriptList/ScriptRecord/Script/DefaultLangSys")!.OfType<XmlElement>()) {
 

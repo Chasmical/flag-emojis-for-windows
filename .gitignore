@@ -1,3 +1,4 @@
+/harfbuzz-win64
 /merged.ttf
 /merged.ttx
 /seguiemj.ttf
@@ -7,4 +8,5 @@
 /twemoji.subset.ttf
 /twemoji.subset.ttx
 /flags-glyphs.txt
-/Segoe UI Emoji with Twemoji flags.ttf
+/Segoe.UI.Emoji.no.changes.ttf
+/Segoe.UI.Emoji.with.Twemoji.Flags.ttf

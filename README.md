@@ -1,4 +1,4 @@
-![](./repo-banner.png)
+![](./img/repo-banner.png)
 
 <h1 align="center">Add Country Flag Emojis to Windows 11</h1>
 
@@ -24,7 +24,7 @@ Unlike literally any other platform or OS, Windows never had flag emojis, and th
 
 But not today... Today I woke up, and the absence of flag emojis in Windows has triggered me like never before, and so I've spent over 14 hours hyperfocused on this task of bringing flag emojis to Windows (without replacing *all* the emojis, that is, like some other projects did).
 
-And now you too can say *"No!"* to Windows, *"I want the flag emojis that everyone else has!"*, download and install [this font](https://github.com/Chasmical/flag-emojis-for-windows/releases/download/v1.0.0/Segoe.UI.Emoji.with.Twemoji.flags.ttf), restart your PC, and finally get to enjoy the full emoji experience on Windows! Here's a quick test for after you install the font: 🇯🇵 🇰🇷 🇩🇪 🇨🇳 🇺🇸 🇫🇷 🇪🇸 🇮🇹 🇷🇺 🇬🇧.
+And now you too can say *"No!"* to Windows, *"I want the flag emojis that everyone else has!"*, download and install [this font](https://github.com/Chasmical/flag-emojis-for-windows/releases/latest/download/Segoe.UI.Emoji.with.Twemoji.Flags.ttf), restart your PC, and finally get to enjoy the full emoji experience on Windows! Here's a quick test for after you install the font: 🇯🇵 🇰🇷 🇩🇪 🇨🇳 🇺🇸 🇫🇷 🇪🇸 🇮🇹 🇷🇺 🇬🇧.
 
 &nbsp;
 
@@ -34,15 +34,65 @@ The font is based on whatever copy of Segoe UI Emoji I had on my PC. I've simply
 
 ## Installation
 
-### [Download this font](https://github.com/Chasmical/flag-emojis-for-windows/releases/download/v1.0.0/Segoe.UI.Emoji.with.Twemoji.flags.ttf) and install it.
+### [Download this font](https://github.com/Chasmical/flag-emojis-for-windows/releases/latest/download/Segoe.UI.Emoji.with.Twemoji.Flags.ttf) and install it ***for all users***.
 
 ### Restart your PC to apply changes.
 
+![](./img/install-for-all-users.png)
+
 &nbsp;
 
-#### Uninstalling
+Regular **"Install"** will only affect a few certain apps: Chromium-based browsers (Chrome, Opera, Vivaldi, etc), and Electron-based apps (Discord, VS Code, etc), so if that's enough for you, you can do this type of install.
+
+**"Install for all users"** will attempt to render country flags in the system and many other apps too. Sometimes with mixed results though, since the system renders fonts inconsistently (more on that in the next section).
+
+
+
+#### Uninstalling (if installed for all users)
+
+Download the [original Segoe UI Emoji](https://github.com/Chasmical/flag-emojis-for-windows/releases/latest/download/Segoe.UI.Emoji.without.ttf) and install it for all users.
+
+#### Uninstalling (if installed for current user)
 
 Go to Settings > Personalization > Fonts, and find and select Segoe UI Emoji in the list. In the Metadata section, find the font file that you installed. Press the "Uninstall" button, and restart your PC.
+
+
+
+## Screenshots
+
+### It works perfectly in Chromium-based browsers (e.g. Vivaldi):
+
+<img src="./img/sc-vivaldi.png" width="453" />
+
+### As well as all Electron-based apps (VS Code, Discord, etc):
+
+<img src="./img/sc-vscode.png" width="529" />
+
+### And most non-system apps too (e.g. Notepad++):
+
+<img src="./img/sc-notepadplusplus.png" width="719" />
+
+### But it doesn't quite work in the system itself:
+
+Country flags are uncolored in the Explorer, but so are the rest of the emojis. It must be some sort of a limitation in the system itself, if it doesn't even color Windows's own original emojis.
+
+<img src="./img/sc-explorer-1.png" width="230" /><img src="./img/sc-explorer-2.png" width="230" />
+
+### In UWP apps (most of modern system UI) it works with mixed results:
+
+Fonts preview in "Settings > Personalizations > Fonts" works fine:
+
+<img src="./img/sc-system-settings.png" width="292" />
+
+But everywhere else country flags sometimes appear invisible:
+
+<img src="./img/sc-system-start.png" width="783" />
+<img src="./img/sc-word.png" width="440" />
+<img src="./img/sc-system-taskbar.png" width="236" />
+
+### System Limitations
+
+When the country flags appear invisible, you can see that the rest of emojis "downgrade" to lesser-quality versions. And when country flags are uncolored, the rest of emojis are uncolored too. So it's not something that **any** font can fix, — it's a limitation of the system itself. Maybe in future versions Windows will be able to render emojis consistently everywhere, but at the moment, it's the best that can be done.
 
 
 

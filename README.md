@@ -16,7 +16,7 @@
   </p>
 </div>
 
-<h2 align="center">This font adds <b>country flag emojis</b> to Windows 11, while keeping all the <b>Win11's original emojis</b>! 🇯🇵 🇩🇪 🇨🇳 🇪🇸 🇬🇧 🎨🔥😭💀🥹✨</h2>
+<h2 align="center">This font adds <b>country flag emojis</b> to Windows 11, while keeping all <b>Win11's original emojis</b>! 🇬🇧🧑‍💻🇯🇵😎🇰🇷💀🇨🇳🤖🇫🇷✨🇪🇸🐛🇮🇹</h2>
 
 
 
@@ -24,7 +24,7 @@ Unlike literally any other platform or OS, Windows never had flag emojis, and th
 
 But not today... Today I woke up, and the absence of flag emojis in Windows has triggered me like never before, and so I've spent over 14 hours hyperfocused on this task of bringing flag emojis to Windows (without replacing *all* the emojis, that is, like some other projects did).
 
-And now you too can say *"No!"* to Windows, *"I want the flag emojis that everyone else has!"*, download and install [this font](https://github.com/Chasmical/flag-emojis-for-windows/releases/latest/download/Segoe.UI.Emoji.with.Twemoji.Flags.ttf), restart your PC, and finally get to enjoy the full emoji experience on Windows! Here's a quick test for after you install the font: 🇯🇵 🇰🇷 🇩🇪 🇨🇳 🇺🇸 🇫🇷 🇪🇸 🇮🇹 🇷🇺 🇬🇧.
+And now you too can say *"No!"* to Windows, *"I want the flag emojis that everyone else has!"*, download and install this font, restart your PC, and finally get to enjoy the full emoji experience on Windows!
 
 &nbsp;
 

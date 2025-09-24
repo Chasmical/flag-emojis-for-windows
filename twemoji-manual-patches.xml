@@ -61,6 +61,36 @@
 
 
 
+<GlyphClassDef>
+      <ClassDef glyph="uE0061" class="1"/>
+      <ClassDef glyph="uE0062" class="1"/>
+      <ClassDef glyph="uE0063" class="1"/>
+      <ClassDef glyph="uE0064" class="1"/>
+      <ClassDef glyph="uE0065" class="1"/>
+      <ClassDef glyph="uE0066" class="1"/>
+      <ClassDef glyph="uE0067" class="1"/>
+      <ClassDef glyph="uE0068" class="1"/>
+      <ClassDef glyph="uE0069" class="1"/>
+      <ClassDef glyph="uE006A" class="1"/>
+      <ClassDef glyph="uE006B" class="1"/>
+      <ClassDef glyph="uE006C" class="1"/>
+      <ClassDef glyph="uE006D" class="1"/>
+      <ClassDef glyph="uE006E" class="1"/>
+      <ClassDef glyph="uE006F" class="1"/>
+      <ClassDef glyph="uE0070" class="1"/>
+      <ClassDef glyph="uE0071" class="1"/>
+      <ClassDef glyph="uE0072" class="1"/>
+      <ClassDef glyph="uE0073" class="1"/>
+      <ClassDef glyph="uE0074" class="1"/>
+      <ClassDef glyph="uE0075" class="1"/>
+      <ClassDef glyph="uE0076" class="1"/>
+      <ClassDef glyph="uE0077" class="1"/>
+      <ClassDef glyph="uE0078" class="1"/>
+      <ClassDef glyph="uE0079" class="1"/>
+      <ClassDef glyph="uE007A" class="1"/>
+      <ClassDef glyph="uE007F" class="1"/>
+
+
 
 <glyf>
     <TTGlyph name="uE0061"/>

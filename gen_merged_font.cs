@@ -27,10 +27,10 @@ foreach (var glyphord in tglyphorder.ChildNodes.OfType<XmlElement>()) {
 	oldIdToOldName[oldId] = oldName;
 
 	if (oldName == ".notdef") continue;
-	if (oldName.StartsWith('u')) continue;
+	if (oldName.StartsWith("u1F")) continue;
 
 	var newId = idCounter++;
-	string newName = $"flagglyph{nameId++:00000}";
+	string newName = oldName.StartsWith('u') ? oldName : $"flagglyph{nameId++:00000}";
 	oldIdToNewId[oldId] = newId;
 	mapNames[oldName] = newName;
 
@@ -47,7 +47,7 @@ var sglyfCount = sglyf.ChildNodes.OfType<XmlElement>().Count();
 
 foreach (var ttglyph in tglyf.ChildNodes.OfType<XmlElement>()) {
 	string? name = ttglyph.GetAttribute("name");
-    if (name is null or ".notdef" || name.StartsWith('u')) continue;
+    if (name is null or ".notdef" || name.StartsWith("u1F")) continue;
 
 	ttglyph.SetAttribute("name", mapNames[name]);
     XmlNode clone = sdoc.ImportNode(ttglyph, deep: true);
@@ -61,10 +61,28 @@ var thmtx = tdoc.SelectSingleNode("/ttFont/hmtx")!;
 var shmtx = sdoc.SelectSingleNode("/ttFont/hmtx")!;
 foreach (var mtx in thmtx.ChildNodes.OfType<XmlElement>()) {
     string name = mtx.GetAttribute("name");
-    if (name == ".notdef" || name.StartsWith('u')) continue;
+    if (name == ".notdef" || name.StartsWith("u1F")) continue;
     mtx.SetAttribute("name", mapNames[name]);
 	var clone = sdoc.ImportNode(mtx, deep: true);
 	shmtx.AppendChild(clone);
+}
+
+
+
+// Copy tag latin letters to Segoe's <cmap>
+var scmaps = sdoc.SelectNodes("/ttFont/cmap/cmap_format_12");
+var tcmap = tdoc.SelectSingleNode("/ttFont/cmap/cmap_format_12")!;
+foreach (var smap in scmaps.OfType<XmlElement>())
+{
+	foreach (var elem in tcmap.ChildNodes.OfType<XmlElement>())
+	{
+		string name = elem.GetAttribute("name");
+		if (name.StartsWith('u') && !name.StartsWith("u1F"))
+		{
+			var clone = sdoc.ImportNode(elem, deep: true);
+			smap.AppendChild(clone);
+		}
+	}
 }
 
 
@@ -74,7 +92,7 @@ var tgdef = tdoc.SelectSingleNode("/ttFont/GDEF/GlyphClassDef")!;
 var sgdef = sdoc.SelectSingleNode("/ttFont/GDEF/GlyphClassDef")!;
 foreach (var def in tgdef.ChildNodes.OfType<XmlElement>()) {
     string name = def.GetAttribute("glyph");
-    def.SetAttribute("glyph", name.StartsWith('u') ? name : mapNames[name]);
+    def.SetAttribute("glyph", name.StartsWith("u1F") ? name : mapNames[name]);
 	var clone = sdoc.ImportNode(def, deep: true);
 	sgdef.AppendChild(clone);
 }
@@ -219,7 +237,7 @@ bool RecurseLayers(IEnumerable<XmlElement> elements) {
     foreach (var elem in elements) {
 	    if (elem.Name == "Glyph") {
 		    string name = elem.GetAttribute("value");
-			if (name.StartsWith('u')) return false;
+			if (name.StartsWith("u1F")) return false;
 		    elem.SetAttribute("value", mapNames[name]);
 		} else if (elem.Name == "PaletteIndex") {
 		    var oldIndex = int.Parse(elem.GetAttribute("value"));
@@ -252,11 +270,11 @@ foreach (var clip in tclips.ChildNodes.OfType<XmlElement>()) {
     foreach (var gl in clip.ChildNodes.OfType<XmlElement>().ToArray()) {
 	    if (gl.Name == "Glyph") {
 		    string name = gl.GetAttribute("value");
-			if (name.StartsWith('u')) {
+			if (name.StartsWith("u1F")) {
 			    clip.RemoveChild(gl);
 			    continue;
 			}
-	    	gl.SetAttribute("value", name.StartsWith('u') ? name : mapNames[name]);
+	    	gl.SetAttribute("value", name.StartsWith("u1F") ? name : mapNames[name]);
 		}
 	}
 	var clone = sdoc.ImportNode(clip, deep: true);
@@ -276,8 +294,8 @@ foreach (var record in tbaseglyphs.ChildNodes.OfType<XmlElement>()) {
 
 	var baseglyph = (XmlElement)record.SelectSingleNode("BaseGlyph")!;
 	string name = baseglyph.GetAttribute("value");
-	if (name.StartsWith('u')) continue;
-	baseglyph.SetAttribute("value", name.StartsWith('u') ? name : mapNames[name]);
+	if (name.StartsWith("u1F")) continue;
+	baseglyph.SetAttribute("value", name.StartsWith("u1F") ? name : mapNames[name]);
 
 	if (record.SelectSingleNode("Paint/FirstLayerIndex") is XmlElement elem) {
 	    var oldIndex2 = int.Parse(elem.GetAttribute("value"));
@@ -296,7 +314,7 @@ sdoc.SelectSingleNode("/ttFont")!.AppendChild(ssvg);
 var tsvg = tdoc.SelectSingleNode("/ttFont/SVG")!;
 foreach (var svgdoc in tsvg.ChildNodes.OfType<XmlElement>()) {
     var oldEnd = int.Parse(svgdoc.GetAttribute("endGlyphID"));
-	if (oldIdToOldName[oldEnd].StartsWith('u')) continue;
+	if (oldIdToOldName[oldEnd].StartsWith("u1F")) continue;
     svgdoc.SetAttribute("endGlyphID", oldIdToNewId[oldEnd].ToString());
     var oldStart = int.Parse(svgdoc.GetAttribute("startGlyphID"));
     svgdoc.SetAttribute("startGlyphID", oldIdToNewId[oldStart].ToString());

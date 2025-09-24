@@ -1,0 +1,130 @@
+
+<GlyphOrder>
+    <GlyphID id="12824" name="uE0061"/>
+    <GlyphID id="12825" name="uE0062"/>
+    <GlyphID id="12826" name="uE0063"/>
+    <GlyphID id="12827" name="uE0064"/>
+    <GlyphID id="12828" name="uE0065"/>
+    <GlyphID id="12829" name="uE0066"/>
+    <GlyphID id="12830" name="uE0067"/>
+    <GlyphID id="12831" name="uE0068"/>
+    <GlyphID id="12832" name="uE0069"/>
+    <GlyphID id="12833" name="uE006A"/>
+    <GlyphID id="12834" name="uE006B"/>
+    <GlyphID id="12835" name="uE006C"/>
+    <GlyphID id="12836" name="uE006D"/>
+    <GlyphID id="12837" name="uE006E"/>
+    <GlyphID id="12838" name="uE006F"/>
+    <GlyphID id="12839" name="uE0070"/>
+    <GlyphID id="12840" name="uE0071"/>
+    <GlyphID id="12841" name="uE0072"/>
+    <GlyphID id="12842" name="uE0073"/>
+    <GlyphID id="12843" name="uE0074"/>
+    <GlyphID id="12844" name="uE0075"/>
+    <GlyphID id="12845" name="uE0076"/>
+    <GlyphID id="12846" name="uE0077"/>
+    <GlyphID id="12847" name="uE0078"/>
+    <GlyphID id="12848" name="uE0079"/>
+    <GlyphID id="12849" name="uE007A"/>
+    <GlyphID id="12850" name="uE007F"/>
+
+
+
+<mtx>
+    <mtx name="uE0061" width="0" lsb="0"/>
+    <mtx name="uE0062" width="0" lsb="0"/>
+    <mtx name="uE0063" width="0" lsb="0"/>
+    <mtx name="uE0064" width="0" lsb="0"/>
+    <mtx name="uE0065" width="0" lsb="0"/>
+    <mtx name="uE0066" width="0" lsb="0"/>
+    <mtx name="uE0067" width="0" lsb="0"/>
+    <mtx name="uE0068" width="0" lsb="0"/>
+    <mtx name="uE0069" width="0" lsb="0"/>
+    <mtx name="uE006A" width="0" lsb="0"/>
+    <mtx name="uE006B" width="0" lsb="0"/>
+    <mtx name="uE006C" width="0" lsb="0"/>
+    <mtx name="uE006D" width="0" lsb="0"/>
+    <mtx name="uE006E" width="0" lsb="0"/>
+    <mtx name="uE006F" width="0" lsb="0"/>
+    <mtx name="uE0070" width="0" lsb="0"/>
+    <mtx name="uE0071" width="0" lsb="0"/>
+    <mtx name="uE0072" width="0" lsb="0"/>
+    <mtx name="uE0073" width="0" lsb="0"/>
+    <mtx name="uE0074" width="0" lsb="0"/>
+    <mtx name="uE0075" width="0" lsb="0"/>
+    <mtx name="uE0076" width="0" lsb="0"/>
+    <mtx name="uE0077" width="0" lsb="0"/>
+    <mtx name="uE0078" width="0" lsb="0"/>
+    <mtx name="uE0079" width="0" lsb="0"/>
+    <mtx name="uE007A" width="0" lsb="0"/>
+    <mtx name="uE007F" width="0" lsb="0"/>
+
+
+
+
+<glyf>
+    <TTGlyph name="uE0061"/>
+    <TTGlyph name="uE0062"/>
+    <TTGlyph name="uE0063"/>
+    <TTGlyph name="uE0064"/>
+    <TTGlyph name="uE0065"/>
+    <TTGlyph name="uE0066"/>
+    <TTGlyph name="uE0067"/>
+    <TTGlyph name="uE0068"/>
+    <TTGlyph name="uE0069"/>
+    <TTGlyph name="uE006A"/>
+    <TTGlyph name="uE006B"/>
+    <TTGlyph name="uE006C"/>
+    <TTGlyph name="uE006D"/>
+    <TTGlyph name="uE006E"/>
+    <TTGlyph name="uE006F"/>
+    <TTGlyph name="uE0070"/>
+    <TTGlyph name="uE0071"/>
+    <TTGlyph name="uE0072"/>
+    <TTGlyph name="uE0073"/>
+    <TTGlyph name="uE0074"/>
+    <TTGlyph name="uE0075"/>
+    <TTGlyph name="uE0076"/>
+    <TTGlyph name="uE0077"/>
+    <TTGlyph name="uE0078"/>
+    <TTGlyph name="uE0079"/>
+    <TTGlyph name="uE007A"/>
+    <TTGlyph name="uE007F"/>
+
+
+
+          <LigatureSet glyph="u1F3F4">
+            <Ligature components="uE0067,uE0062,uE0065,uE006E,uE0067,uE007F" glyph="1f3f4-e0067-e0062-e0065-e006e-e0067-e007f"/>
+            <Ligature components="uE0067,uE0062,uE0073,uE0063,uE0074,uE007F" glyph="1f3f4-e0067-e0062-e0073-e0063-e0074-e007f"/>
+            <Ligature components="uE0067,uE0062,uE0077,uE006C,uE0073,uE007F" glyph="1f3f4-e0067-e0062-e0077-e006c-e0073-e007f"/>
+
+
+
+<cmap>
+      <map code="0xe0061" name="uE0061"/>
+      <map code="0xe0062" name="uE0062"/>
+      <map code="0xe0063" name="uE0063"/>
+      <map code="0xe0064" name="uE0064"/>
+      <map code="0xe0065" name="uE0065"/>
+      <map code="0xe0066" name="uE0066"/>
+      <map code="0xe0067" name="uE0067"/>
+      <map code="0xe0068" name="uE0068"/>
+      <map code="0xe0069" name="uE0069"/>
+      <map code="0xe006a" name="uE006A"/>
+      <map code="0xe006b" name="uE006B"/>
+      <map code="0xe006c" name="uE006C"/>
+      <map code="0xe006d" name="uE006D"/>
+      <map code="0xe006e" name="uE006E"/>
+      <map code="0xe006f" name="uE006F"/>
+      <map code="0xe0070" name="uE0070"/>
+      <map code="0xe0071" name="uE0071"/>
+      <map code="0xe0072" name="uE0072"/>
+      <map code="0xe0073" name="uE0073"/>
+      <map code="0xe0074" name="uE0074"/>
+      <map code="0xe0075" name="uE0075"/>
+      <map code="0xe0076" name="uE0076"/>
+      <map code="0xe0077" name="uE0077"/>
+      <map code="0xe0078" name="uE0078"/>
+      <map code="0xe0079" name="uE0079"/>
+      <map code="0xe007a" name="uE007A"/>
+      <map code="0xe007f" name="uE007F"/>

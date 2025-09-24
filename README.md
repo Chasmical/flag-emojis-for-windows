@@ -162,7 +162,7 @@ git, Python/pip, LINQPad (64x, not 32x!), 8-16 Gb of RAM, 1 Gb of disk space.
 
 4. Open LINQPad, and run **[this script](./gen_flag_glyphs.cs)** to generate a list of glyphs:
 
-   That will generate a file with all the glyphs we need (regional indicator symbols U+1F1E6-1F1FF, as well as all their combinations that have a defined flag glyph). It will be used to subset the Twemoji font.
+   That will generate a file with all the glyphs we need (regional indicator symbols U+1F1E6-1F1FF, tag latin letters U+E0061-E007A, cancel tag U+E007F, waving black flag U+1F3F4, as well as all their combinations that have a defined flag glyph). It will be used to subset the Twemoji font.
 
 5. Install `fonttools` (with `lxml` feature) using `pip`:
 
@@ -172,18 +172,32 @@ git, Python/pip, LINQPad (64x, not 32x!), 8-16 Gb of RAM, 1 Gb of disk space.
 
    You might need to add `...\Python\Scripts` to PATH. `pip` should tell you if it's not there already.
 
-6. Subset the Twemoji font using the glyphs file we generated:
+6. Decompile the Twemoji font to XML:
 
    ```sh
-   fonttools.exe subset twemoji.ttf --glyphs-file=flags-glyphs.txt
+   fonttools.exe ttx twemoji.ttf
+   ```
+
+7. Then apply some patches from [here](./twemoji-manual-patches.xml), so that regional flags render . You could automate it, but... They seem simple enough to just do by hand.
+
+8. Recompile the Twemoji font back to TTF (note the `.ttx` extension):
+
+   ```sh
+   fonttools.exe ttx twemoji.ttx
+   ```
+
+9.  Subset the Twemoji font using the glyphs file we generated:
+
+   ```sh
+   fonttools.exe subset twemoji.ttf --glyphs-file=flags-glyphs.txt --ignore-missing-glyphs
    ```
 
    `WARNING: FFTM NOT subset; don't know how to subset; dropped` is normal.
 
    That should create a `twemoji.subset.ttf` file in your working directory.
 
-7. Now, let's "decompile" the fonts to XML:
-   
+10. Now, let's "decompile" the fonts to XML:
+
    ```sh
    fonttools.exe ttx seguiemj.ttf
    fonttools.exe ttx twemoji.subset.ttf
@@ -191,19 +205,19 @@ git, Python/pip, LINQPad (64x, not 32x!), 8-16 Gb of RAM, 1 Gb of disk space.
 
    Decompiling Segoe UI Emoji might take about a minute, and the decompiled file will take up over 250 Mb of space. Twemoji's subset should decompile much quicker, and take up a little below 10 Mb.
 
-8. Then run **[this script](./gen_merged_font.cs)** in LINQPad:
+11. Then run **[this script](./gen_merged_font.cs)** in LINQPad:
 
    This is gonna use a lot of memory (about 8 Gb), but should finish pretty quickly (10-20s).
 
    Now there should be a ~300 Mb `merged.ttx` file in your working directory.
 
-9. And finally, recompile the `merged.ttx` font file:
+12. And finally, recompile the `merged.ttx` font file:
 
    ```sh
    fonttools.exe ttx merged.ttx
    ```
 
-10. And now just install the `merged.ttf` font, and everything should work!
+13. And now just install the `merged.ttf` font, and everything should work!
 
 
 

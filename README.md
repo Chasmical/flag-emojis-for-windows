@@ -1,6 +1,6 @@
 ![](./img/repo-banner.png)
 
-<h1 align="center">Add Country Flag Emojis to Windows 11</h1>
+<h1 align="center">Add Country Flag Emojis to Windows 8-11</h1>
 
 <div align="center">
   <p>
@@ -31,8 +31,16 @@ And now you too can say *"No!"* to Windows, *"I want the flag emojis that everyo
 
 &nbsp;
 
-This font is based on Segoe UI Emoji v1.60 ([3D Fluent 15.1](https://emojipedia.org/microsoft-3D-fluent/fluent-15.1); Win11 23H2; 2024-06-25) and contains 258 flags from the Twitter Color Emoji SVGinOT [v16.0.1](https://github.com/jdecked/twemoji/releases/tag/v16.0.1) (2025-04-14) compiled by [quarrel](https://github.com/quarrel/broken-flag-emojis-win11-twemoji). You can build it yourself, if you'd like (see the "How to build from scratch" section in the end).
+This font is based on Segoe UI Emoji v1.60 ([3D Fluent 16.0](https://emojipedia.org/microsoft-3D-fluent/fluent-16.0); Win11 25H2; 2025-08-29) and contains 258 flags from Twemoji v17.0.3 ([`jdecked/twemoji`](https://github.com/jdecked/twemoji)@[`b6b55fe`](https://github.com/jdecked/twemoji/commit/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b) 2026-06-01). You can build it yourself, if you'd like (see the "How to build from scratch" section in the end).
 
+## Major update v2.0.0 (6 Jul 2026)
+
+- ✨ **Added support for COLRv0 rendering! Now works on Windows 8-10 too.**
+- 💚 Now compiled with the emojis directly from [`jdecked/twemoji`](https://github.com/jdecked/twemoji) repository.
+- ⚡️ Removed unnecessary SVG table, decreasing the font's size from 13.1 to 12.1 MB.
+- 📏 Fixed the relative width and size of the emojis. Now they're the same size as others.
+
+<img src="./img/upd-flag-width.png" width="399" />
 
 
 ## Table of contents
@@ -42,7 +50,7 @@ This font is based on Segoe UI Emoji v1.60 ([3D Fluent 15.1](https://emojipedia.
 3. [Similar projects & comparison](#similar-projects)
 4. [How to build from scratch](#how-to-build-from-scratch)
 
-Also, you can read [my blog post](https://chsm.dev/blog/2025/09/23/bringing-flag-emojis-to-windows-11)!
+Also, you can read [my blog post](https://chsm.dev/blog/2025/09/23/bringing-flag-emojis-to-windows-11)! *(a bit outdated now)*
 
 
 
@@ -64,7 +72,7 @@ Regular **"Install"** will only affect a few certain apps: Chromium-based browse
 
 #### Uninstalling (if installed for all users)
 
-Download the [original Segoe UI Emoji](https://github.com/Chasmical/flag-emojis-for-windows/releases/latest/download/Segoe.UI.Emoji.without.ttf) and install it for all users.
+Recover the original Segoe UI Emoji file: `Copy-Item "C:\Windows\Fonts\seguiemj.ttf"`, and install it for all users.
 
 #### Uninstalling (if installed for current user)
 
@@ -82,29 +90,33 @@ Go to Settings > Personalization > Fonts, and find and select Segoe UI Emoji in 
 
 <img src="./img/sc-vscode.png" width="529" />
 
-### And most non-system apps too (e.g. Notepad++):
+### And most non-system apps (e.g. Notepad++):
 
-<img src="./img/sc-notepadplusplus.png" width="719" />
+<img src="./img/sc-notepadplusplus.png" width="480" />
 
-### But it doesn't quite work in the system itself:
+### It works in UWP apps too (most of modern system UI):
+
+In a Microsoft Word document:
+
+<img src="./img/sc-word.png" width="550" />
+
+Fonts preview in "Settings > Personalizations > Fonts":
+
+<img src="./img/sc-system-settings.png" width="466" />
+
+In the system Start menu:
+
+<img src="./img/sc-system-start.png" width="625" />
+
+In the system task bar:
+
+<img src="./img/sc-system-taskbar.png" width="416" />
+
+### System Limitations
 
 Country flags are uncolored in the Explorer, but so are the rest of the emojis. It must be some sort of a limitation in the system itself, if it doesn't even color Windows's own original emojis.
 
-<img src="./img/sc-explorer-1.png" width="230" /><img src="./img/sc-explorer-2.png" width="230" />
-
-### In UWP apps (most of modern system UI) it works with mixed results:
-
-Fonts preview in "Settings > Personalizations > Fonts" works fine:
-
-<img src="./img/sc-system-settings.png" width="292" />
-
-But everywhere else country flags sometimes appear invisible:
-
-<img src="./img/sc-system-start.png" width="783" />
-<img src="./img/sc-word.png" width="440" />
-<img src="./img/sc-system-taskbar.png" width="236" />
-
-### System Limitations
+<img src="./img/sc-explorer-1.png" width="240" /><img src="./img/sc-explorer-2.png" width="240" />
 
 When the country flags appear invisible, you can see that the rest of emojis "downgrade" to lesser-quality versions. And when country flags are uncolored, the rest of emojis are uncolored too. So it's not something that **any** font can fix, — it's a limitation of the system itself. Maybe in future versions Windows will be able to render emojis consistently everywhere, but at the moment, it's the best that can be done.
 
@@ -112,9 +124,9 @@ When the country flags appear invisible, you can see that the rest of emojis "do
 
 ## Similar projects
 
-- [`perguto/Country-Flag-Emojis-for-Windows`](https://github.com/perguto/Country-Flag-Emojis-for-Windows) completely replaces Segoe UI Emoji with Google's Noto Color Emoji.
+- [`perguto/Country-Flag-Emojis-for-Windows`](https://github.com/perguto/Country-Flag-Emojis-for-Windows) replaces Segoe UI Emoji with Google's Noto Color Emoji.
 
-- [`quarrel/broken-flag-emojis-win11-twemoji`](https://github.com/quarrel/broken-flag-emojis-win11-twemoji) completely replaces Segoe UI Emoji with Twemoji emojis.
+- [`quarrel/broken-flag-emojis-win11-twemoji`](https://github.com/quarrel/broken-flag-emojis-win11-twemoji) replaces Segoe UI Emoji with Twemoji emojis.
 
 Here are the emojis that you get in all projects, for comparison:
 
@@ -132,92 +144,77 @@ I decided to use Twitter's flag emojis, since Noto's wavy ones just look weird �
 
 ## How to build from scratch
 
-You can read [my blog post](https://chsm.dev/blog/2025/09/23/bringing-flag-emojis-to-windows-11) to see how I came to this solution.
-
 ### Prerequisites
 
 git, Python/pip, LINQPad (64x, not 32x!), 8-16 Gb of RAM, 1 Gb of disk space.
 
 ### Steps
 
-1. First, copy the original Segoe UI Emoji font from your system's folder:
-
-   ```ps1
-   Copy-Item "C:\Windows\Fonts\seguiemj.ttf"
-   ```
-
-   When you install the new font, the one in `C:\Windows\Fonts` should remain unchanged, but we'll back it up just in case.
-
-2. Download the [16.0.1 Twemoji font](https://github.com/quarrel/broken-flag-emojis-win11-twemoji/blob/main/Twemoji-16.0.1-SVG-COLR1.ttf) (from [quarrel/broken-flag-emojis-win11-twemoji](https://github.com/quarrel/broken-flag-emojis-win11-twemoji) repository), and put it in your working directory:
-
-   ```ps1
-   Invoke-WebRequest -Uri "https://github.com/quarrel/broken-flag-emojis-win11-twemoji/raw/refs/heads/main/Twemoji-16.0.1-SVG-COLR1.ttf" -OutFile twemoji.ttf
-   ```
-
-3. Clone the [`13rac1/twemoji-color-font`](https://github.com/13rac1/twemoji-color-font) repository:
-
-   ```sh
-   git clone https://github.com/13rac1/twemoji-color-font
-   ```
-
-4. Open LINQPad, and run **[this script](./gen_flag_glyphs.cs)** to generate a list of glyphs:
-
-   That will generate a file with all the glyphs we need (regional indicator symbols U+1F1E6-1F1FF, tag latin letters U+E0061-E007A, cancel tag U+E007F, waving black flag U+1F3F4, as well as all their combinations that have a defined flag glyph). It will be used to subset the Twemoji font.
-
-5. Install `fonttools` (with `lxml` feature) using `pip`:
+1. First, install `fonttools` (with `lxml` feature) and `nanoemoji` using `pip`:
 
    ```sh
    pip install fonttools[lxml]
+   pip install nanoemoji
    ```
 
    You might need to add `...\Python\Scripts` to PATH. `pip` should tell you if it's not there already.
 
-6. Decompile the Twemoji font to XML:
+2. Then clone the [`jdecked/twemoji`](https://github.com/jdecked/twemoji) repository, and copy the original Segoe UI Emoji font from your system's folder:
 
    ```sh
-   fonttools.exe ttx twemoji.ttf
+   git clone --no-checkout --depth=1 --filter=tree:0 https://github.com/jdecked/twemoji
+   cd twemoji
+   git sparse-checkout set --no-cone /assets/svg
+   git checkout
+   cd ..
+
+   Copy-Item "C:\Windows\Fonts\seguiemj.ttf"
    ```
 
-7. Then apply some patches from [here](./twemoji-manual-patches.xml), so that regional flags render . You could automate it, but... They seem simple enough to just do by hand.
+   When you install the new font, the original `seguiemj.ttf` should remain unchanged, so don't worry.
 
-8. Recompile the Twemoji font back to TTF (note the `.ttx` extension):
+3. Open LINQPad, and run **[this script](./gen_flag_glyphs.cs)** to generate a list of flag glyph paths.
+
+4. Now let's use `nanoemoji` to compile a COLRv0 font from the list of paths we just generated:
 
    ```sh
-   fonttools.exe ttx twemoji.ttx
+   nanoemoji --color_format glyf_colr_0 --upem 2048 --width 2812 `
+     --transform "scale(1.666666) translate(-554.666666, 85.333333)" `
+     $(Get-Content flag-glyphs.txt)
+
+   Copy-Item build/Font.ttf twemoji.flags.ttf
    ```
 
-9. Subset the Twemoji font using the glyphs file we generated:
+   Segoe UI Emoji's units-per-em metric is 2048, and the its emojis' width is 2812. Some extra scaling and repositioning is also needed to make Twemoji's emojis fit in. The scale/translate parameters may not be perfect, I more or less just adjusted until it was good enough.
+
+5. Now, let's "decompile" the fonts to XML:
 
    ```sh
-   fonttools.exe subset twemoji.ttf --glyphs-file=flags-glyphs.txt --ignore-missing-glyphs
+   fonttools.exe ttx seguiemj.ttf
+   fonttools.exe ttx twemoji.flags.ttf
    ```
 
-   `WARNING: FFTM NOT subset; don't know how to subset; dropped` is normal.
+   Decompiling Segoe UI Emoji might take about a minute, and the decompiled file will take up over 250 Mb of space. Twemoji's flags should decompile near-instantly and be tiny.
 
-   That should create a `twemoji.subset.ttf` file in your working directory.
+6. Then run **[this script](./gen_merged_font.cs)** in LINQPad:
 
-10. Now, let's "decompile" the fonts to XML:
+   This is gonna use a lot of memory (about 2-4 Gb), but should finish pretty quickly (10-20s).
 
-    ```sh
-    fonttools.exe ttx seguiemj.ttf
-    fonttools.exe ttx twemoji.subset.ttf
-    ```
+   Now there should be a ~280 Mb `merged.ttx` file in your working directory.
 
-    Decompiling Segoe UI Emoji might take about a minute, and the decompiled file will take up over 250 Mb of space. Twemoji's subset should decompile much quicker, and take up a little below 10 Mb.
+7. And finally, recompile the `merged.ttx` font file:
 
-11. Then run **[this script](./gen_merged_font.cs)** in LINQPad:
+   ```sh
+   fonttools.exe ttx merged.ttx
+   ```
 
-    This is gonna use a lot of memory (about 8 Gb), but should finish pretty quickly (10-20s).
+8. (optional) Test the font with `hb-view`:
 
-    Now there should be a ~300 Mb `merged.ttx` file in your working directory.
+   ```sh
+   hb-view merged.ttf --output-file="merged.test.png" '🦄🐦‍🔥🏳️‍⚧️🇬🇧🏴󠁧󠁢󠁷󠁬󠁳󠁿🏳️‍⚧️'
+   ```
 
-12. And finally, recompile the `merged.ttx` font file:
-
-    ```sh
-    fonttools.exe ttx merged.ttx
-    ```
-
-13. And now just install the `merged.ttf` font, and everything should work!
+9. And now just install the `merged.ttf` font, and everything should work!
 
 
 

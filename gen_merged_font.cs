@@ -4,7 +4,7 @@ var dir = @"D:\repos\flag-emojis-for-windows";
 var sdoc = new XmlDocument();
 sdoc.Load(Path.Join(dir, "seguiemj.ttx"));
 var tdoc = new XmlDocument();
-tdoc.Load(Path.Join(dir, "twemoji.subset.ttx"));
+tdoc.Load(Path.Join(dir, "twemoji.flags.ttx"));
 
 
 
@@ -52,6 +52,10 @@ foreach (var ttglyph in tglyf.ChildNodes.OfType<XmlElement>()) {
 	ttglyph.SetAttribute("name", mapNames[name]);
     XmlNode clone = sdoc.ImportNode(ttglyph, deep: true);
     sglyf.AppendChild(clone);
+
+	if (clone.SelectSingleNode("component") is XmlElement comp) {
+		comp.SetAttribute("glyphName", mapNames[comp.GetAttribute("glyphName")]);
+	}
 }
 
 
@@ -88,13 +92,13 @@ foreach (var smap in scmaps.OfType<XmlElement>())
 
 
 // Copy flag glyphs' class defs to Segoe's <GDEF>
-var tgdef = tdoc.SelectSingleNode("/ttFont/GDEF/GlyphClassDef")!;
 var sgdef = sdoc.SelectSingleNode("/ttFont/GDEF/GlyphClassDef")!;
-foreach (var def in tgdef.ChildNodes.OfType<XmlElement>()) {
-    string name = def.GetAttribute("glyph");
-    def.SetAttribute("glyph", name.StartsWith("u1F") ? name : mapNames[name]);
-	var clone = sdoc.ImportNode(def, deep: true);
-	sgdef.AppendChild(clone);
+foreach (var tGlyphName in mapNames.Values) {
+	if (sgdef.ChildNodes.OfType<XmlElement>().Any(x => x.GetAttribute("glyph") == tGlyphName)) continue;
+	var def = sdoc.CreateElement("ClassDef");
+	def.SetAttribute("glyph", tGlyphName);
+	def.SetAttribute("class", "2");
+	sgdef.AppendChild(def);
 }
 
 
@@ -223,92 +227,83 @@ foreach (var flagColor in dissimilarColors.Keys) {
 var newPaletteSize = spalette.ChildNodes.OfType<XmlElement>().Count();
 sPaletteNumEntries.SetAttribute("value", newPaletteSize.ToString());
 
-// Determine layer offset
-int sLayerCount = sdoc.SelectSingleNode("/ttFont/COLR/LayerList")!
-    .ChildNodes.OfType<XmlElement>().Count();
 
 
+var sname = sdoc.SelectSingleNode("/ttFont/name");
+{
+	var desc = sdoc.CreateElement("namerecord");
+	desc.SetAttribute("nameID", "10");
+	desc.SetAttribute("platformID", "3");
+	desc.SetAttribute("platEncID", "1");
+	desc.SetAttribute("langID", "0x409");
+	desc.InnerText = "https://github.com/Chasmical/flag-emojis-for-windows";
+	sname.AppendChild(desc);
 
-// Copy flag glyphs' layers to Segoe's <COLR><LayerList>
-var tlayers = tdoc.SelectSingleNode("/ttFont/COLR/LayerList")!;
-var slayers = sdoc.SelectSingleNode("/ttFont/COLR/LayerList")!;
-
-bool RecurseLayers(IEnumerable<XmlElement> elements) {
-    foreach (var elem in elements) {
-	    if (elem.Name == "Glyph") {
-		    string name = elem.GetAttribute("value");
-			if (name.StartsWith("u1F")) return false;
-		    elem.SetAttribute("value", mapNames[name]);
-		} else if (elem.Name == "PaletteIndex") {
-		    var oldIndex = int.Parse(elem.GetAttribute("value"));
-			elem.SetAttribute("value", mapPaletteEntries[oldIndex].ToString());
-		} else if (elem.Name == "FirstLayerIndex") {
-		    // NumLayers stays the same
-		    var oldIndex = int.Parse(elem.GetAttribute("value"));
-			elem.SetAttribute("value", (sLayerCount + oldIndex).ToString());
-		}
-	    if (!RecurseLayers(elem.ChildNodes.OfType<XmlElement>())) return false;
-	}
-	return true;
-}
-
-foreach (var rootPaint in tlayers.ChildNodes.OfType<XmlElement>()) {
-    var oldIndex = int.Parse(rootPaint.GetAttribute("index"));
-    rootPaint.SetAttribute("index", (sLayerCount + oldIndex).ToString());
-	if (!RecurseLayers(rootPaint.ChildNodes.OfType<XmlElement>())) continue;
-
-	var clone = sdoc.ImportNode(rootPaint, deep: true);
-	slayers.AppendChild(clone);
+	var sample = sname.SelectSingleNode("namerecord[@nameID='19']");
+	sample.InnerText = "😂😍😭💁👍💀🏠🛫🦈🦄🐼🐦‍🔥🏳️‍⚧️🇬🇧";
 }
 
 
 
-// Copy flag glyphs' clips to Segoe's <COLR><ClipList>
-var tclips = tdoc.SelectSingleNode("/ttFont/COLR/ClipList")!;
-var sclips = sdoc.SelectSingleNode("/ttFont/COLR/ClipList")!;
-foreach (var clip in tclips.ChildNodes.OfType<XmlElement>()) {
-    foreach (var gl in clip.ChildNodes.OfType<XmlElement>().ToArray()) {
-	    if (gl.Name == "Glyph") {
-		    string name = gl.GetAttribute("value");
-			if (name.StartsWith("u1F")) {
-			    clip.RemoveChild(gl);
-			    continue;
-			}
-	    	gl.SetAttribute("value", name.StartsWith("u1F") ? name : mapNames[name]);
-		}
-	}
-	var clone = sdoc.ImportNode(clip, deep: true);
-	sclips.AppendChild(clone);
+List<(string glyph, List<(int colorId, string glyph)> Layers)> tColorGlyphs = [];
+
+var tbaseglyphrecs = tdoc.SelectSingleNode("/ttFont/COLR")!.ChildNodes
+	.OfType<XmlElement>().Where(x => x.Name == "ColorGlyph");
+foreach (var colorGlyph in tbaseglyphrecs) {
+	tColorGlyphs.Add((
+	    colorGlyph.GetAttribute("name"),
+		colorGlyph.ChildNodes.OfType<XmlElement>().Select(x => {
+			return (int.Parse(x.GetAttribute("colorID")), x.GetAttribute("name"));
+		}).ToList()
+	));
 }
 
+// Write layers from COLRv0 to COLRv1's LayerRecordArray
 
+var sBaseGlyphRecords = sdoc.SelectSingleNode("/ttFont/COLR/BaseGlyphRecordArray")!;
+var sLayerRecords = sdoc.SelectSingleNode("/ttFont/COLR/LayerRecordArray")!;
+var sBaseGlyphRecordCount = sBaseGlyphRecords.ChildNodes.OfType<XmlElement>().Count();
+var sLayerRecordCount = sLayerRecords.ChildNodes.OfType<XmlElement>().Count();
 
-// Copy flag glyphs' base glyphs to Segoe's <COLR><BaseGlyphList>
-var sBaseGlyphRecordCount = sdoc.SelectSingleNode("/ttFont/COLR/BaseGlyphList")!
-    .ChildNodes.OfType<XmlElement>().Count();
-var tbaseglyphs = tdoc.SelectSingleNode("/ttFont/COLR/BaseGlyphList")!;
-var sbaseglyphs = sdoc.SelectSingleNode("/ttFont/COLR/BaseGlyphList")!;
-foreach (var record in tbaseglyphs.ChildNodes.OfType<XmlElement>()) {
-    var oldIndex = int.Parse(record.GetAttribute("index"));
-	record.SetAttribute("index", (sBaseGlyphRecordCount + oldIndex).ToString());
+foreach (var (glyph, layers) in tColorGlyphs) {
+	var baseGlyph = sdoc.CreateElement("BaseGlyphRecord");
+	baseGlyph.SetAttribute("index", (sBaseGlyphRecordCount++).ToString());
+	sBaseGlyphRecords.AppendChild(baseGlyph);
 
-	var baseglyph = (XmlElement)record.SelectSingleNode("BaseGlyph")!;
-	string name = baseglyph.GetAttribute("value");
-	if (name.StartsWith("u1F")) continue;
-	baseglyph.SetAttribute("value", name.StartsWith("u1F") ? name : mapNames[name]);
+	var x = sdoc.CreateElement("BaseGlyph");
+	x.SetAttribute("value", mapNames[glyph]);
+	if (glyph.StartsWith("u1F")) throw new Exception();
+	baseGlyph.AppendChild(x);
 
-	if (record.SelectSingleNode("Paint/FirstLayerIndex") is XmlElement elem) {
-	    var oldIndex2 = int.Parse(elem.GetAttribute("value"));
-		elem.SetAttribute("value", (sLayerCount + oldIndex2).ToString());
+	var y = sdoc.CreateElement("FirstLayerIndex");
+	y.SetAttribute("value", sLayerRecordCount.ToString());
+	baseGlyph.AppendChild(y);
+
+	var z = sdoc.CreateElement("NumLayers");
+	z.SetAttribute("value", layers.Count.ToString());
+	baseGlyph.AppendChild(z);
+
+	foreach (var (colorId, glyphName) in layers) {
+		var layerRec = sdoc.CreateElement("LayerRecord");
+		layerRec.SetAttribute("index", (sLayerRecordCount++).ToString());
+		sLayerRecords.AppendChild(layerRec);
+
+		var a = sdoc.CreateElement("LayerGlyph");
+		a.SetAttribute("value", mapNames[glyphName]);
+		layerRec.AppendChild(a);
+
+		var b = sdoc.CreateElement("PaletteIndex");
+		b.SetAttribute("value", mapPaletteEntries[colorId].ToString());
+		layerRec.AppendChild(b);
 	}
-
-	var clone = sdoc.ImportNode(record, deep: true);
-	sbaseglyphs.AppendChild(clone);
 }
 
 
 
 // Copy flag glyphs' svg docs to Segoe's <SVG>
+
+// COLRv0 file doesnt have SVG embedded
+/*
 var ssvg = sdoc.CreateElement("SVG");
 sdoc.SelectSingleNode("/ttFont")!.AppendChild(ssvg);
 var tsvg = tdoc.SelectSingleNode("/ttFont/SVG")!;
@@ -322,7 +317,7 @@ foreach (var svgdoc in tsvg.ChildNodes.OfType<XmlElement>()) {
 	var clone = sdoc.ImportNode(svgdoc, deep: true);
 	ssvg.AppendChild(clone);
 }
-
+*/
 
 
 // Note: Segoe's <cmap> already maps regional indicator symbols
@@ -345,58 +340,17 @@ foreach (var lookup in tlookups.ChildNodes.OfType<XmlElement>()) {
 	}
 	var lookupType = ((XmlElement)lookup.SelectSingleNode("LookupType")!).GetAttribute("value");
 	if (lookupType == "4") {
-	    // Indicate that this is a ligature lookup in the feature record
-		// if (sLigaFeature is null) {
-        //     var sFeatureList = sdoc.SelectSingleNode("/ttFont/GSUB/FeatureList")!;
-		// 	var record = sdoc.CreateElement("FeatureRecord");
-		// 	var tag = sdoc.CreateElement("FeatureTag");
-		// 	record.AppendChild(tag);
-		// 	var feature = sdoc.CreateElement("Feature");
-		// 	record.AppendChild(feature);
-
-		// 	record.SetAttribute("index", sFeatureList.ChildNodes.OfType<XmlElement>().Count().ToString());
-		// 	sFeatureList.AppendChild(record);
-		// 	tag.SetAttribute("value", "liga");
-		// 	sLigaFeature = feature;
-		// }
-//		if (sLatnScript is null) {
-//            var sScriptList = sdoc.SelectSingleNode("/ttFont/GSUB/ScriptList")!;
-//			var record = sdoc.CreateElement("ScriptRecord");
-//			var tag = sdoc.CreateElement("ScriptTag");
-//			record.AppendChild(tag);
-//			var script = sdoc.CreateElement("Script");
-//			record.AppendChild(script);
-//			var langSys = sdoc.CreateElement("DefaultLangSys");
-//			script.AppendChild(langSys);
-//
-//			record.SetAttribute("index", sScriptList.ChildNodes.OfType<XmlElement>().Count().ToString());
-//			sScriptList.AppendChild(record);
-//			tag.SetAttribute("value", "latn");
-//			sLatnScript = langSys;
-//		}
-
 		 var index = sdoc.CreateElement("LookupListIndex");
 		 var indexIndex = sCcmpFeature.ChildNodes.OfType<XmlElement>().Count();
 		 index.SetAttribute("index", indexIndex.ToString());
 		 index.SetAttribute("value", lookup.GetAttribute("index"));
 		 sCcmpFeature.AppendChild(index);
-
-		// foreach (var script in sdoc.SelectNodes("/ttFont/GSUB/ScriptList/ScriptRecord/Script/DefaultLangSys")!.OfType<XmlElement>()) {
-
-		// var index2 = sdoc.CreateElement("FeatureIndex");
-		// var indexIndex2 = script.ChildNodes.OfType<XmlElement>().Count() - 1;
-		// index2.SetAttribute("index", indexIndex2.ToString());
-		// var parentsChildren = sLigaFeature.ParentNode!.ChildNodes.OfType<XmlElement>().ToList();
-		// index2.SetAttribute("value", parentsChildren.IndexOf(sLigaFeature).ToString());
-		// script.AppendChild(index2);
-
-		// }
-
 	}
 
 	var clone = sdoc.ImportNode(lookup, deep: true);
 	slookups.AppendChild(clone);
 }
+
 
 
 

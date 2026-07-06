@@ -1,4 +1,6 @@
-var dir = @"D:\repos\flag-emojis-for-windows"; // <== Your working directory here
+using System.Text.RegularExpressions;
+
+var dir = Directory.GetCurrentDirectory();
 
 var regIndSyms = Enumerable.Range(0x1f1e6, 26).Select(x => Convert.ToString(x, 16));
 var latinTagSyms = Enumerable.Range(0xe0061, 26).Select(x => Convert.ToString(x, 16));

@@ -146,7 +146,7 @@ I decided to use Twitter's flag emojis, since Noto's wavy ones just look weird â
 
 ### Prerequisites
 
-git, Python/pip, LINQPad (64x, not 32x!), 8-16 Gb of RAM, 1 Gb of disk space.
+git, .NET SDK 10+, Python/pip, 8-16 Gb of RAM, 1 Gb of disk space.
 
 ### Steps
 
@@ -173,7 +173,11 @@ git, Python/pip, LINQPad (64x, not 32x!), 8-16 Gb of RAM, 1 Gb of disk space.
 
    When you install the new font, the original `seguiemj.ttf` should remain unchanged, so don't worry.
 
-3. Open LINQPad, and run **[this script](./gen_flag_glyphs.cs)** to generate a list of flag glyph paths.
+3. Run `gen_flag_glyphs.cs` to generate a list of flag glyph paths.
+
+   ```sh
+   dotnet run gen_flag_glyphs.cs
+   ```
 
 4. Now let's use `nanoemoji` to compile a COLRv0 font from the list of paths we just generated:
 
@@ -196,7 +200,11 @@ git, Python/pip, LINQPad (64x, not 32x!), 8-16 Gb of RAM, 1 Gb of disk space.
 
    Decompiling Segoe UI Emoji might take about a minute, and the decompiled file will take up over 250 Mb of space. Twemoji's flags should decompile near-instantly and be tiny.
 
-6. Then run **[this script](./gen_merged_font.cs)** in LINQPad:
+6. Then run `gen_merged_font.cs`:
+
+   ```sh
+   dotnet run gen_merged_font.cs
+   ```
 
    This is gonna use a lot of memory (about 2-4 Gb), but should finish pretty quickly (10-20s).
 

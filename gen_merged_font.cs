@@ -1,4 +1,6 @@
-var dir = @"D:\repos\flag-emojis-for-windows";
+using System.Xml;
+
+var dir = Directory.GetCurrentDirectory();
 
 // 's' prefix - segoe ui emoji, 't' prefix - twemoji
 var sdoc = new XmlDocument();
@@ -74,7 +76,7 @@ foreach (var mtx in thmtx.ChildNodes.OfType<XmlElement>()) {
 
 
 // Copy tag latin letters to Segoe's <cmap>
-var scmaps = sdoc.SelectNodes("/ttFont/cmap/cmap_format_12");
+var scmaps = sdoc.SelectNodes("/ttFont/cmap/cmap_format_12")!;
 var tcmap = tdoc.SelectSingleNode("/ttFont/cmap/cmap_format_12")!;
 foreach (var smap in scmaps.OfType<XmlElement>())
 {
@@ -113,7 +115,7 @@ foreach (var entry in spalette.ChildNodes.OfType<XmlElement>()) {
     var id = int.Parse(entry.GetAttribute("index"));
     if (!colorToSegoeId.TryAdd(entry.GetAttribute("value"), id)) dups++;
 }
-print($"Segoe palette duplicates: {dups}");
+Console.WriteLine($"Segoe palette duplicates: {dups}");
 var segoeColorCount = colorToSegoeId.Count;
 
 
@@ -141,7 +143,7 @@ List<string> uniqueFlagsColors = flagsColors;
 Dictionary<string, string> dissimilarColors = [];
 
 bool tooMany = segoeColorCount + flagsColors.Count >= ushort.MaxValue;
-print($"{segoeColorCount} + {flagsColors.Count} - {(tooMany ? "too many" : "ok")}");
+Console.WriteLine($"{segoeColorCount} + {flagsColors.Count} - {(tooMany ? "too many" : "ok")}");
 
 int similarity = 1;
 while (tooMany) {
@@ -168,8 +170,8 @@ while (tooMany) {
 	});
 
     tooMany = segoeColorCount + uniqueFlagsColors.Count >= ushort.MaxValue;
-	print($"Tones lost <= {similarity} ({flagsColors.Count} => {uniqueFlagsColors.Count})");
-    print($"{segoeColorCount} + {uniqueFlagsColors.Count} - {(tooMany ? "too many" : "ok")}");
+	Console.WriteLine($"Tones lost <= {similarity} ({flagsColors.Count} => {uniqueFlagsColors.Count})");
+    Console.WriteLine($"{segoeColorCount} + {uniqueFlagsColors.Count} - {(tooMany ? "too many" : "ok")}");
 	similarity++;
 }
 
@@ -229,7 +231,7 @@ sPaletteNumEntries.SetAttribute("value", newPaletteSize.ToString());
 
 
 
-var sname = sdoc.SelectSingleNode("/ttFont/name");
+var sname = sdoc.SelectSingleNode("/ttFont/name")!;
 {
 	var desc = sdoc.CreateElement("namerecord");
 	desc.SetAttribute("nameID", "10");
@@ -239,7 +241,7 @@ var sname = sdoc.SelectSingleNode("/ttFont/name");
 	desc.InnerText = "https://github.com/Chasmical/flag-emojis-for-windows";
 	sname.AppendChild(desc);
 
-	var sample = sname.SelectSingleNode("namerecord[@nameID='19']");
+	var sample = sname.SelectSingleNode("namerecord[@nameID='19']")!;
 	sample.InnerText = "😂😍😭💁👍💀🏠🛫🦈🦄🐼🐦‍🔥🏳️‍⚧️🇬🇧";
 }
 

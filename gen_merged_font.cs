@@ -19,6 +19,9 @@ int nameId = 0;
 var tglyphorder = tdoc.SelectSingleNode("/ttFont/GlyphOrder")!;
 var sglyphorder = sdoc.SelectSingleNode("/ttFont/GlyphOrder")!;
 
+static bool IsRegInd(ReadOnlySpan<char> name)
+	=> name.StartsWith('u') && Convert.ToUInt32(name[1..].ToString(), 16) is 0x1f3f4 or (>= 0x1f1e6 and <= 0x1f1ff);
+
 int idCounter = sglyphorder.ChildNodes.OfType<XmlElement>()
 	.Select(n => int.Parse(n.GetAttribute("id"))).Max() + 1;
 
@@ -28,8 +31,7 @@ foreach (var glyphord in tglyphorder.ChildNodes.OfType<XmlElement>()) {
 	var oldId = int.Parse(glyphord.GetAttribute("id"));
 	oldIdToOldName[oldId] = oldName;
 
-	if (oldName == ".notdef") continue;
-	if (oldName.StartsWith("u1F")) continue;
+	if (oldName is ".notdef" or "space" || IsRegInd(oldName)) continue;
 
 	var newId = idCounter++;
 	string newName = oldName.StartsWith('u') ? oldName : $"flagglyph{nameId++:00000}";
@@ -49,7 +51,7 @@ var sglyfCount = sglyf.ChildNodes.OfType<XmlElement>().Count();
 
 foreach (var ttglyph in tglyf.ChildNodes.OfType<XmlElement>()) {
 	string? name = ttglyph.GetAttribute("name");
-    if (name is null or ".notdef" || name.StartsWith("u1F")) continue;
+    if (name is null or ".notdef" or "space" || IsRegInd(name)) continue;
 
 	ttglyph.SetAttribute("name", mapNames[name]);
     XmlNode clone = sdoc.ImportNode(ttglyph, deep: true);
@@ -67,7 +69,7 @@ var thmtx = tdoc.SelectSingleNode("/ttFont/hmtx")!;
 var shmtx = sdoc.SelectSingleNode("/ttFont/hmtx")!;
 foreach (var mtx in thmtx.ChildNodes.OfType<XmlElement>()) {
     string name = mtx.GetAttribute("name");
-    if (name == ".notdef" || name.StartsWith("u1F")) continue;
+    if (name is null or ".notdef" or "space" || IsRegInd(name)) continue;
     mtx.SetAttribute("name", mapNames[name]);
 	var clone = sdoc.ImportNode(mtx, deep: true);
 	shmtx.AppendChild(clone);
@@ -83,11 +85,11 @@ foreach (var smap in scmaps.OfType<XmlElement>())
 	foreach (var elem in tcmap.ChildNodes.OfType<XmlElement>())
 	{
 		string name = elem.GetAttribute("name");
-		if (name.StartsWith('u') && !name.StartsWith("u1F"))
-		{
-			var clone = sdoc.ImportNode(elem, deep: true);
-			smap.AppendChild(clone);
-		}
+		if (name is ".notdef" or "space" || IsRegInd(name)) continue;
+
+		var clone = (XmlElement)sdoc.ImportNode(elem, deep: true);
+		clone.SetAttribute("name", mapNames[name]);
+		smap.AppendChild(clone);
 	}
 }
 
@@ -268,13 +270,14 @@ var sBaseGlyphRecordCount = sBaseGlyphRecords.ChildNodes.OfType<XmlElement>().Co
 var sLayerRecordCount = sLayerRecords.ChildNodes.OfType<XmlElement>().Count();
 
 foreach (var (glyph, layers) in tColorGlyphs) {
+	if (glyph is ".notdef" or "space" || IsRegInd(glyph)) throw new Exception();
+
 	var baseGlyph = sdoc.CreateElement("BaseGlyphRecord");
 	baseGlyph.SetAttribute("index", (sBaseGlyphRecordCount++).ToString());
 	sBaseGlyphRecords.AppendChild(baseGlyph);
 
 	var x = sdoc.CreateElement("BaseGlyph");
 	x.SetAttribute("value", mapNames[glyph]);
-	if (glyph.StartsWith("u1F")) throw new Exception();
 	baseGlyph.AppendChild(x);
 
 	var y = sdoc.CreateElement("FirstLayerIndex");

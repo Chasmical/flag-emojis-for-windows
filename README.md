@@ -144,85 +144,8 @@ I decided to use Twitter's flag emojis, since Noto's wavy ones just look weird �
 
 ## How to build from scratch
 
-### Prerequisites
-
-git, .NET SDK 10+, Python/pip, 8-16 Gb of RAM, 1 Gb of disk space.
-
-### Steps
-
-1. First, install `fonttools` (with `lxml` feature) and `nanoemoji` using `pip`:
-
-   ```sh
-   pip install fonttools[lxml]
-   pip install nanoemoji
-   ```
-
-   You might need to add `...\Python\Scripts` to PATH. `pip` should tell you if it's not there already.
-
-2. Then clone the [`jdecked/twemoji`](https://github.com/jdecked/twemoji) repository, and copy the original Segoe UI Emoji font from your system's folder:
-
-   ```sh
-   git clone --no-checkout --depth=1 --filter=tree:0 https://github.com/jdecked/twemoji
-   cd twemoji
-   git sparse-checkout set --no-cone /assets/svg
-   git checkout
-   cd ..
-
-   Copy-Item "C:\Windows\Fonts\seguiemj.ttf"
-   ```
-
-   When you install the new font, the original `seguiemj.ttf` should remain unchanged, so don't worry.
-
-3. Run `gen_flag_glyphs.cs` to generate a list of flag glyph paths.
-
-   ```sh
-   dotnet run gen_flag_glyphs.cs
-   ```
-
-4. Now let's use `nanoemoji` to compile a COLRv0 font from the list of paths we just generated:
-
-   ```sh
-   nanoemoji --color_format glyf_colr_0 --upem 2048 --width 2812 `
-     --transform "scale(1.666666) translate(-554.666666, 85.333333)" `
-     $(Get-Content flag-glyphs.txt)
-
-   Copy-Item build/Font.ttf twemoji.flags.ttf
-   ```
-
-   Segoe UI Emoji's units-per-em metric is 2048, and the its emojis' width is 2812. Some extra scaling and repositioning is also needed to make Twemoji's emojis fit in. The scale/translate parameters may not be perfect, I more or less just adjusted until it was good enough.
-
-5. Now, let's "decompile" the fonts to XML:
-
-   ```sh
-   fonttools.exe ttx seguiemj.ttf
-   fonttools.exe ttx twemoji.flags.ttf
-   ```
-
-   Decompiling Segoe UI Emoji might take about a minute, and the decompiled file will take up over 250 Mb of space. Twemoji's flags should decompile near-instantly and be tiny.
-
-6. Then run `gen_merged_font.cs`:
-
-   ```sh
-   dotnet run gen_merged_font.cs
-   ```
-
-   This is gonna use a lot of memory (about 2-4 Gb), but should finish pretty quickly (10-20s).
-
-   Now there should be a ~280 Mb `merged.ttx` file in your working directory.
-
-7. And finally, recompile the `merged.ttx` font file:
-
-   ```sh
-   fonttools.exe ttx merged.ttx
-   ```
-
-8. (optional) Test the font with `hb-view`:
-
-   ```sh
-   hb-view merged.ttf --output-file="merged.test.png" '🦄🐦‍🔥🏳️‍⚧️🇬🇧🏴󠁧󠁢󠁷󠁬󠁳󠁿🏳️‍⚧️'
-   ```
-
-9. And now just install the `merged.ttf` font, and everything should work!
+> [!NOTE]
+> The instructions are being reworked. You can see the [old instructions here](https://github.com/Chasmical/flag-emojis-for-windows/tree/6aeb33a995af8f29ec63a6cae984ea63cc2f1b67#how-to-build-from-scratch).
 
 
 

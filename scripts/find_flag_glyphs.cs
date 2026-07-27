@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+#pragma warning disable
 
 var repoDir = Path.GetDirectoryName(Directory.GetCurrentDirectory());
 var glyphsFolder = Path.Join(repoDir, "build", "jdecked-twemoji", "assets", "svg");
@@ -22,6 +23,7 @@ static bool IsRegionalFlag(ReadOnlySpan<uint> codepoints) {
 foreach (var glyphPath in Directory.GetFiles(glyphsFolder)) {
 	var glyphName = Path.GetFileNameWithoutExtension(glyphPath);
 	if (ParseCodepoints(glyphName) is { } cps && (IsCountryFlag(cps) || IsRegionalFlag(cps))) {
-		Console.WriteLine(glyphPath);
+		Console.Write(Path.GetRelativePath(repoDir, glyphPath).Replace('\\', '/'));
+		Console.Write('\n');
 	}
 }

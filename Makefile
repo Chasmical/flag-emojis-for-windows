@@ -1,8 +1,6 @@
 # I was learning Make as I was writing this, so I'll include a quick breakdown of everything
 # happening in this file, so that those who don't know Make can understand what's happening.
 #
-# # Quick breakdown of Make
-#
 # A Makefile consists of recipes like `target: dep1 dep2`, that tell Make how to make that target.
 # Make runs the indented commands below, usually each command in separate shell instance, but I've
 # specified the `.ONESHELL:` thing, so all commands in a recipe share a shell instance now, which
@@ -39,10 +37,21 @@ SHELL := /bin/bash
 # directory is somewhere in /mnt/* (that's where Windows' partitions (e.g. C:, D:) are).
 
 IS_WSL := $(shell [[ -n "$$WSL_DISTRO_NAME" && $$PWD == /mnt/* ]] && echo yes)
-GIT := $(if $(IS_WSL),git.exe,git)
 
-# TODO: automatically determine if we need to use % or %.exe for:
-# dotnet, svgo, inkscape, magick, mkbitmap, potrace, nanoemoji.
+define find_cmd
+$(if $(IS_WSL),$(shell command -v $1.exe >/dev/null && echo $1.exe || echo $1),$1)
+endef
+
+GIT := $(call find_cmd,git)
+DOTNET := $(call find_cmd,dotnet)
+NANOEMOJI := $(call find_cmd,nanoemoji)
+INKSCAPE := $(call find_cmd,inkscape)
+MAGICK := $(call find_cmd,magick)
+MKBITMAP := $(call find_cmd,mkbitmap)
+POTRACE := $(call find_cmd,potrace)
+FONTTOOLS := $(call find_cmd,fonttools)
+
+# TODO: automatically determine if we need to use % or %.exe for: svgo.
 
 # TODO: figure out parallelization (probably with just `fast:\n  $(MAKE) -j $(CPU_CORES)`)
 CPU_CORES := $(shell cat /proc/cpuinfo | grep processor | wc -l)
@@ -52,7 +61,7 @@ CPU_CORES := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 
 
 
-build: build/twemoji.flags.color.ttf
+build: build/merged.ttf
 
 clean:
 	rm -rf build
@@ -106,42 +115,99 @@ build/jdecked-twemoji/.git/HEAD:
 	@$(GIT) sparse-checkout set --no-cone /assets/svg
 	@$(GIT) -c advice.detachedHead=false checkout origin/main
 
-# Keep track of jdecked/twemoji's current commit
-build/jdecked-twemoji/commit.sha: build/jdecked-twemoji/.git/HEAD
-	@cmp -s $@ $< || cp $< $@
+# Use the script to find all flag glyphs in jdecked/twemoji
+build/glyph-list.txt: scripts/find_flag_glyphs.cs build/jdecked-twemoji/.git/HEAD
+	@$(DOTNET) $< >$@.tmp && mv $@.tmp $@
 
-# When the commit or the script change, rebuild glyph-list.txt
-build/glyph-list.txt: scripts/find_flag_glyphs.cs build/jdecked-twemoji/commit.sha
-	@echo "Rebuilding $@..."
-	@dotnet.exe $< >$@.tmp && mv $@.tmp $@
 
-# When glyph-list.txt changes, copy the glyphs over to build/svg-color/*.svg
-build/svg-color/.updated: build/glyph-list.txt
-	@echo "Copying over twemoji glyphs..."
+
+# When glyph-list.txt updates, copy the glyphs over to svg-color/*.svg
+build/svg-color/.manifest: build/glyph-list.txt
 	@mkdir -p $(@D)
-	@rm -f $(@D)/*.svg
-	@xargs -a $< cp -t $(@D)
-	@touch $@
 
-# Keep track of build/svg-color/*.svg in a manifest
-build/svg-color/.manifest: build/svg-color/.updated ALWAYS_REBUILD
-	@$(call update_manifest,$@,$(@D)/*.svg)
+	changed=$$(for glyph in $$(cat $<); do
+		color=$(@D)/$${glyph##*/};
+		[ "$$color" -nt "$$glyph" ] || echo "$$glyph";
+	done);
 
-# When the manifest changes, rebuild the font with color flags
-build/twemoji.flags.color.ttf: build/svg-color/.manifest
+	if [ -n "$$changed" ]; then
+		count=$$(echo "$$changed" | wc -l)
+		echo "Copying $$count glyphs from twemoji/jdecked..."
+
+		echo "$$changed" | xargs -n 20 -P "$(CPU_CORES)" cp -t $(@D)
+		touch $@
+	fi
+
+# When svg-color/*.svg change, re-build whatever changed in svg-bw/*.svg
+build/svg-bw/.manifest: build/svg-color/.manifest
+	@mkdir -p $(@D)
+
+	changed=$$(for color in build/svg-color/*.svg; do
+		bw=$(@D)/$${color##*/};
+		[ "$$bw" -nt "$$color" ] || echo "$$color";
+	done);
+
+	if [ -n "$$changed" ]; then
+		count=$$(echo "$$changed" | wc -l)
+		echo "Converting $$count glyphs to B&W..."
+
+		echo "$$changed" | xargs -n 1 -P "$(CPU_CORES)" sh -c '
+			bw=$(@D)/$${1##*/};
+			echo "Converting to B&W $${bw##*/}...";
+			$(INKSCAPE) -w 1000 -h 1000 --export-filename "$$bw.png" "$$1";
+			$(MAGICK) "$$bw.png" -gravity center -extent 1066x1066 "$$bw.bmp";
+			$(MKBITMAP) -g -s 1 -f 10 -o "$$bw.pgm" "$$bw.bmp";
+			$(POTRACE) --flat -s --height 36 --width 36 -o "$$bw" "$$bw.pgm";
+			rm "$$bw.png" "$$bw.bmp" "$$bw.pgm";
+		' sh
+
+		touch $@
+	fi
+
+
+
+# When the svg-color/ manifest changes, rebuild the font with color flags
+build/twemoji.flags.color/Font.ttf: build/svg-color/.manifest
 	@echo "Building $@..."
-	@nanoemoji.exe --color_format glyf_colr_0 --upem 2048 --width 2812 \
+	@$(NANOEMOJI) --color_format glyf_colr_0 --upem 2048 --width 2812 \
 		--transform "scale(1.666666) translate(-554.666666, 85.333333)" \
-		--build_dir build/build.twemoji.flags.color \
-		$$(cat build/glyph-list.txt)
-	@cp build/build.twemoji.flags.color/Font.ttf $@
+		--build_dir build/twemoji.flags.color \
+		$$(ls -1 build/svg-color/*.svg)
+
+# When the svg-bw/ manifest changes, rebuild the font with b&w flags
+build/twemoji.flags.bw/Font.ttf: build/svg-bw/.manifest
+	@echo "Building $@..."
+	@$(NANOEMOJI) --color_format glyf --upem 2048 --width 2812 \
+		--transform "scale(1.666666) translate(-554.666666, 85.333333)" \
+		--build_dir build/twemoji.flags.bw \
+		$$(ls -1 build/svg-bw/*.svg)
 
 
 
-# TODO: compile b&w glyphs
+# Decompile the fonts to .ttx
+build/seguiemj.ttx: build/seguiemj.ttf
+	rm -f $@
+	@echo "Decompiling $<..."
+	@$(FONTTOOLS) ttx $<
 
-# TODO: build b&w flags font
+build/twemoji.flags.color/Font.ttx: build/twemoji.flags.color/Font.ttf
+	rm -f $@
+	@echo "Decompiling $<..."
+	@$(FONTTOOLS) ttx $<
 
-# TODO: merge seguiemj, color flags and b&w flags fonts
+build/twemoji.flags.bw/Font.ttx: build/twemoji.flags.bw/Font.ttf
+	rm -f $@
+	@echo "Decompiling $<..."
+	@$(FONTTOOLS) ttx $<
+
+# Merge all the fonts into one
+build/merged.ttx: scripts/gen_merged_font.cs build/seguiemj.ttx build/twemoji.flags.color/Font.ttx build/twemoji.flags.bw/Font.ttx
+	@echo "Generating $@..."
+	@$(DOTNET) $^ $@
+
+build/merged.ttf: build/merged.ttx
+	rm -f $@
+	@echo "Recompiling $@..."
+	@$(FONTTOOLS) ttx $<
 
 

@@ -154,6 +154,9 @@ build/svg-bw/.manifest: build/svg-color/.manifest
 		echo "$$changed" | xargs -n 1 -P "$(CPU_CORES)" sh -c '
 			bw=$(@D)/$${1##*/};
 			echo "Converting to B&W $${bw##*/}...";
+# https://gitlab.com/inkscape/inkscape/-/work_items/4716#note_1898150983
+			export SELF_CALL=xxx;
+
 			$(INKSCAPE) -w 1000 -h 1000 --export-filename "$$bw.png" "$$1";
 			$(MAGICK) "$$bw.png" -gravity center -extent 1066x1066 "$$bw.bmp";
 			$(MKBITMAP) -g -s 1 -f 10 -o "$$bw.pgm" "$$bw.bmp";

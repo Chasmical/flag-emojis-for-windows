@@ -50,24 +50,27 @@ MAGICK := $(call find_cmd,magick)
 MKBITMAP := $(call find_cmd,mkbitmap)
 POTRACE := $(call find_cmd,potrace)
 FONTTOOLS := $(call find_cmd,fonttools)
+HB_VIEW := $(call find_cmd,hb-view)
 
-# TODO: automatically determine if we need to use % or %.exe for: svgo.
-
-# TODO: figure out parallelization (probably with just `fast:\n  $(MAKE) -j $(CPU_CORES)`)
+# This is used for parallelization in recipes. The recipes themselves are run in an order.
 CPU_CORES := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 
 # These are the only commands that should be run through the CLI
-.PHONY: build clean rebuild
+.PHONY: build test clean rebuild
 
 
 
 build: build/merged.ttf
 
+FLAGS_PER_LINE ?= 16
+# Can be overriden with `make test FLAGS_PER_LINE=8`
+test: build/tests/flags_$(FLAGS_PER_LINE).png
+
 clean:
 	rm -rf build
 
 rebuild: clean
-	$(MAKE) build
+	@$(MAKE) build
 
 # TODO: add update actions for twemoji and seguiemj
 #
@@ -76,27 +79,6 @@ rebuild: clean
 # 	$(GIT) fetch --no-tags --depth=1 origin main
 # 	$(GIT) checkout FETCH_HEAD
 # 	touch .git/HEAD
-
-
-
-# I could have used Make's wildcards or patterns (*.svg, %.svg), but decided against them, as they
-# bloated the process and slowed Make down significantly (it's definitely because I'm using a WSL
-# instead of a proper Unix environment). So I decided to use manifests, that keep track of files
-# matching a pattern, and that get updated only when something changes.
-
-# $1: manifest file, $2: tracked files
-define update_manifest
-	@stat -c '%n %y' $2 >$1.tmp; \
-	if cmp -s $1.tmp $1; then \
-		rm -f $1.tmp; echo "$1: up-to-date"; \
-	else \
-		mv $1.tmp $1; echo "$1: sources updated"; \
-	fi
-endef
-
-# Anything depending on ALWAYS_REBUILD will always be rebuilt (useful for manifests)
-.PHONY: ALWAYS_REBUILD
-ALWAYS_REBUILD:
 
 
 
@@ -116,13 +98,18 @@ build/jdecked-twemoji/.git/HEAD:
 	@$(GIT) -c advice.detachedHead=false checkout origin/main
 
 # Use the script to find all flag glyphs in jdecked/twemoji
-build/glyph-list.txt: scripts/find_flag_glyphs.cs build/jdecked-twemoji/.git/HEAD
+build/glyph-paths.txt: scripts/find_flag_glyphs.cs build/jdecked-twemoji/.git/HEAD
 	@$(DOTNET) $< >$@.tmp && mv $@.tmp $@
 
 
 
-# When glyph-list.txt updates, copy the glyphs over to svg-color/*.svg
-build/svg-color/.manifest: build/glyph-list.txt
+# I could have used Make's wildcards or patterns (*.svg, %.svg), but decided against them, as they
+# bloated the process and slowed Make down significantly (it's definitely because I'm using a WSL
+# instead of a proper Unix environment). So I decided to use manifests, that keep track of files
+# matching a pattern, and that get updated only when something changes.
+
+# When glyph-paths.txt changes, copy the glyphs over to svg-color/*.svg
+build/svg-color/.manifest: build/glyph-paths.txt
 	@mkdir -p $(@D)
 
 	changed=$$(for glyph in $$(cat $<); do
@@ -186,17 +173,17 @@ build/twemoji.flags.bw/Font.ttf: build/svg-bw/.manifest
 
 # Decompile the fonts to .ttx
 build/seguiemj.ttx: build/seguiemj.ttf
-	rm -f $@
+	@rm -f $@
 	@echo "Decompiling $<..."
 	@$(FONTTOOLS) ttx $<
 
 build/twemoji.flags.color/Font.ttx: build/twemoji.flags.color/Font.ttf
-	rm -f $@
+	@rm -f $@
 	@echo "Decompiling $<..."
 	@$(FONTTOOLS) ttx $<
 
 build/twemoji.flags.bw/Font.ttx: build/twemoji.flags.bw/Font.ttf
-	rm -f $@
+	@rm -f $@
 	@echo "Decompiling $<..."
 	@$(FONTTOOLS) ttx $<
 
@@ -206,8 +193,16 @@ build/merged.ttx: scripts/gen_merged_font.cs build/seguiemj.ttx build/twemoji.fl
 	@$(DOTNET) $^ $@
 
 build/merged.ttf: build/merged.ttx
-	rm -f $@
+	@rm -f $@
 	@echo "Recompiling $@..."
 	@$(FONTTOOLS) ttx $<
 
 
+
+# Group flags into lines and render them using hb-view
+build/tests/flags_$(FLAGS_PER_LINE).txt: scripts/print_glyphs.cs build/glyph-paths.txt
+	@mkdir -p $(@D)
+	@$(DOTNET) $^ | xargs -n $(FLAGS_PER_LINE) | tr -d " " | sed 's/^/🏳️‍⚧️/; s/$$/🏳️‍🌈/' >$@
+
+build/tests/flags_$(FLAGS_PER_LINE).png: build/merged.ttf build/tests/flags_$(FLAGS_PER_LINE).txt
+	@$(HB_VIEW) $< --output-file="$@" --text-file="$(word 2,$^)" --background=none

@@ -64,7 +64,7 @@ build: build/merged.ttf
 
 FLAGS_PER_LINE ?= 16
 # Can be overriden with `make test FLAGS_PER_LINE=8`
-test: build/tests/flags_$(FLAGS_PER_LINE).png
+test: build/tests/flags_$(FLAGS_PER_LINE).png build/tests/flags_$(FLAGS_PER_LINE)_bw.png
 
 clean:
 	rm -rf build
@@ -206,3 +206,6 @@ build/tests/flags_$(FLAGS_PER_LINE).txt: scripts/print_glyphs.cs build/glyph-pat
 
 build/tests/flags_$(FLAGS_PER_LINE).png: build/merged.ttf build/tests/flags_$(FLAGS_PER_LINE).txt
 	@$(HB_VIEW) $< --output-file="$@" --text-file="$(word 2,$^)" --background=none
+
+build/tests/flags_$(FLAGS_PER_LINE)_bw.png: build/merged.ttf build/tests/flags_$(FLAGS_PER_LINE).txt
+	@$(HB_VIEW) $< --output-file="$@" --text-file="$(word 2,$^)" --draw

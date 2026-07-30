@@ -38,25 +38,30 @@ SHELL := /bin/bash
 
 IS_WSL := $(shell [[ -n "$$WSL_DISTRO_NAME" && $$PWD == /mnt/* ]] && echo yes)
 
-define find_cmd
+define find_exe
 $(if $(IS_WSL),$(shell command -v $1.exe >/dev/null && echo $1.exe || echo $1),$1)
 endef
+define find_ps1
+$(if $(IS_WSL),$(shell command -v $1.ps1 >/dev/null && echo pwsh.exe -nop -c $1.ps1 || echo $1),$1)
+endef
 
-GIT := $(call find_cmd,git)
-DOTNET := $(call find_cmd,dotnet)
-NANOEMOJI := $(call find_cmd,nanoemoji)
-INKSCAPE := $(call find_cmd,inkscape)
-MAGICK := $(call find_cmd,magick)
-MKBITMAP := $(call find_cmd,mkbitmap)
-POTRACE := $(call find_cmd,potrace)
-FONTTOOLS := $(call find_cmd,fonttools)
-HB_VIEW := $(call find_cmd,hb-view)
+GIT := $(call find_exe,git)
+DOTNET := $(call find_exe,dotnet)
+NANOEMOJI := $(call find_exe,nanoemoji)
+INKSCAPE := $(call find_exe,inkscape)
+MAGICK := $(call find_exe,magick)
+MKBITMAP := $(call find_exe,mkbitmap)
+POTRACE := $(call find_exe,potrace)
+FONTTOOLS := $(call find_exe,fonttools)
+HB_VIEW := $(call find_exe,hb-view)
+
+SVGO := $(call find_ps1,svgo)
 
 # This is used for parallelization in recipes. The recipes themselves are run in an order.
 CPU_CORES := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 
 # These are the only commands that should be run through the CLI
-.PHONY: build test clean rebuild
+.PHONY: build test test-vars clean rebuild
 
 
 
@@ -65,6 +70,13 @@ build: build/merged.ttf
 FLAGS_PER_LINE ?= 16
 # Can be overriden with `make test FLAGS_PER_LINE=8`
 test: build/tests/flags_$(FLAGS_PER_LINE).png build/tests/flags_$(FLAGS_PER_LINE)_bw.png
+
+test-vars:
+	@printf "%s\n" GIT=$(GIT) DOTNET=$(DOTNET) \
+		NANOEMOJI=$(NANOEMOJI) INKSCAPE=$(INKSCAPE) \
+		MAGICK=$(MAGICK) MKBITMAP=$(MKBITMAP) POTRACE=$(POTRACE) \
+		FONTTOOLS=$(FONTTOOLS) HB_VIEW=$(HB_VIEW) \
+		SVGO="$(SVGO)" CPU_CORES=$(CPU_CORES)
 
 clean:
 	rm -rf build
@@ -84,7 +96,8 @@ rebuild: clean
 
 # Get the seguiemj.ttf from C:\Windows\Fonts
 build/seguiemj.ttf:
-	@powershell.exe -NoProfile -Command "cp C:\Windows\Fonts\seguiemj.ttf $@.tmp"
+	@mkdir -p $(@D)
+	@pwsh.exe -nop -c "cp C:\Windows\Fonts\seguiemj.ttf $@.tmp"
 	@cmp -s $@.tmp $@ && rm $@.tmp || mv $@.tmp $@
 
 # Clone the jdecked/twemoji repository
@@ -121,7 +134,7 @@ build/svg-color/.manifest: build/glyph-paths.txt
 		count=$$(echo "$$changed" | wc -l)
 		echo "Copying $$count glyphs from twemoji/jdecked..."
 
-		echo "$$changed" | xargs -n 20 -P "$(CPU_CORES)" cp -t $(@D)
+		echo "$$changed" | xargs -n 20 -P "$(CPU_CORES)" $(SVGO) --quiet --multipass -o $(@D) -i
 		touch $@
 	fi
 
@@ -144,7 +157,11 @@ build/svg-bw/.manifest: build/svg-color/.manifest
 			$(INKSCAPE) -w 1000 -h 1000 --export-filename "$$bw.png" "$$1";
 			$(MAGICK) "$$bw.png" -gravity center -extent 1066x1066 "$$bw.bmp";
 			$(MKBITMAP) -g -s 1 -f 10 -o "$$bw.pgm" "$$bw.bmp";
-			$(POTRACE) --flat -s --height 36 --width 36 -o "$$bw" "$$bw.pgm";
+			$(POTRACE) --flat -s -W 36pt -H 36pt -o "$$bw" "$$bw.pgm";
+# Note: SVGO can't meaningfully optimize Potrace's output. It removes metadata and transforms,
+# and converts int coords to float coords, resulting in an average 50% size increase. But, we
+# do need to change the width and height from 36pt to just 36, so it's sized correctly.
+			sed -i '\''s/width="36.000000pt" height="36.000000pt" //g'\'' "$$bw";
 			rm "$$bw.png" "$$bw.bmp" "$$bw.pgm";
 		' sh
 

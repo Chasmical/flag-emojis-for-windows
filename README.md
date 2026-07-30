@@ -144,18 +144,53 @@ I decided to use Twitter's flag emojis, since Noto's wavy ones just look weird â
 
 ## How to build from scratch
 
+The project's build process is pretty complicated and takes a long time (full run = 5 mins on 20-core CPU), so I put it all in a Makefile, to cache and reuse intermediate results. If you're on Windows, you'll need [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) to run Make and all the Unix commands.
+
+### Prerequisites
+
+- [git](https://git-scm.com/install/windows) for cloning [`jdecked/twemoji`](https://github.com/jdecked/twemoji)'s SVG assets,
+- [.NET SDK 10+](https://dotnet.microsoft.com/en-us/download) for running scripts and merging fonts,
+- [Python/pip](https://www.python.org/downloads/) for [`nanoemoji`](https://github.com/googlefonts/nanoemoji) and [`fonttools`](https://github.com/fonttools/fonttools), [de]compiling fonts,
+- `pip install nanoemoji fonttools[lxml]`
+- [Node.js/npm](https://nodejs.org/en/download/current) for [`svgo`](https://github.com/svg/svgo), optimizing SVG assets,
+- `npm install -g svgo`
+- [Inkscape](https://inkscape.org/release/) for rasterizing SVGs into PNGs,
+- [ImageMagick](https://imagemagick.org/download/) for converting PNGs into BMPs,
+- [Potrace](https://potrace.sourceforge.net/#downloading) for tracing BMPs into single-color SVGs,
+- [HarfBuzz â‰¥14.2.0 (Apr 2026)](https://github.com/harfbuzz/harfbuzz/releases/latest) for font render tests,
+- And don't forget to update your `PATH`.
+
 > [!NOTE]
-> The instructions are being reworked. You can see the [old instructions here](https://github.com/Chasmical/flag-emojis-for-windows/tree/6aeb33a995af8f29ec63a6cae984ea63cc2f1b67#how-to-build-from-scratch).
+> If you're on a Unix OS natively, you can run this to install all dependencies:
+> ```sh
+> sudo apt-get update
+> sudo apt-get install make git dotnet python3 nodejs npm inkscape imagemagick potrace
+> sudo pip install nanoemoji fonttools[lxml]
+> sudo npm install -g svgo
+> ```
+> HarfBuzz needs to be built from sources. You'll also need to get `build/seguiemj.ttf` from somewhere.
 
+### Commands
 
+After installing everything, you can run these Make commands (if you're on Windows, run them in WSL):
+
+- `make build` (default) builds the font (`build/merged.ttf`).
+
+- `make test-vars` prints the commands for the tools that will be used.
+
+- `make test` renders PNGs with all of the flags (`build/tests/`; configurable `make test FLAGS_PER_LINE=8`).
+
+- `make clean` cleans the build cache (simply `rm -rf build`).
+
+- `make rebuild` is a combo of `clean` followed by `build`.
 
 ### Notes
 
-The scripts I wrote are a bit janky and disorganized, since I've had to try so many different things to finally get it to work... And they probably won't work with any other fonts, despite all my attempts to keep it as generic as possible. Feel free to fix it.
+The C# merge script I wrote is a bit janky and disorganized, since I've had to try so many different things to finally get it to work... And it probably won't work with any other fonts, despite all my attempts to keep it as generic as possible.
 
 If you want to add emojis to Segoe UI Emoji from some other font, here's a list of resources that I found useful:
 
-- [fontTools ttx](https://fonttools.readthedocs.io/en/latest/ttx.html) - can decompile TTF into a readable and editable XML, and recompiles it back losslessly.
+- [fontTools ttx](https://fonttools.readthedocs.io/en/latest/ttx.html) can decompile TTF into a readable and editable XML, and recompiles it back losslessly.
 - [OpenType's spec on Microsoft Learn](https://learn.microsoft.com/en-us/typography/opentype/spec/) explains the overall structure of a TTF file and its tables, and what different type ids mean, and etc.
 - [GSUB docs on FontForge](https://fontforge.org/docs/techref/gposgsub.html) clarifies some stuff about substitution lookups.
 - [HarfBuzz](https://harfbuzz.github.io/utilities.html#utilities-command-line-hbview) brought the project to the finish line! It not only renders font characters into the terminal, but also shows the entire textshaping process (run with option `-V`). I was stuck for a while on script and feature switches, not realizing that they disable rendering the ligatures in some places.

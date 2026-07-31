@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Xml.Linq;
 
 var dir = Path.GetDirectoryName(Directory.GetCurrentDirectory());
@@ -410,6 +411,18 @@ foreach (var lookup in bwlookups.Elements()) {
                 sgdef.Elements().First(x => x.Attribute("glyph")!.Value == ligGlyph).Remove();
             }
         }
+    }
+}
+
+
+
+// Also make the regional indicator symbols' widths the same value
+// as a workaround for VSCode's xterm.js terminal (see issue #13).
+foreach (var mtx in shmtx.Elements()) {
+    string name = mtx.Attribute("name")!.Value;
+    if (name.StartsWith('u') && int.TryParse(name[1..], NumberStyles.HexNumber, null, out var cp)
+        && cp is >= 0x1f1e6 and <= 0x1f1ff) {
+        mtx.SetAttributeValue("width", 1406); // half of flag width
     }
 }
 

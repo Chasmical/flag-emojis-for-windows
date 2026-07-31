@@ -189,7 +189,7 @@ build/twemoji.flags.color/Font.ttf: build/svg-color/.manifest
 build/twemoji.flags.bw/Font.ttf: build/svg-bw/.manifest
 	@echo "Building $@..."
 	@$(NANOEMOJI) --color_format glyf --upem 2048 --width 2812 \
-		--transform "scale(1.666666) translate(-554.666666, 85.333333)" \
+		--transform "scale(1.95) translate(-554.666666, 21.333333)" \
 		--build_dir build/twemoji.flags.bw \
 		$$(ls -1 build/svg-bw/*.svg)
 

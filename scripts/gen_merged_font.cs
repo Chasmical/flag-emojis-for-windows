@@ -17,10 +17,12 @@ var saveAs = Path.Join(dir, args[3]); // merged.ttx
 
 
 Dictionary<string, string> mapNames = [];
+Dictionary<string, string> mapBwNames = [];
 int nameId = 0;
 
 // Find the last assigned id
 var tglyphorder = tdoc.Root!.Element("GlyphOrder")!;
+var bwglyphorder = bwdoc.Root!.Element("GlyphOrder")!;
 var sglyphorder = sdoc.Root!.Element("GlyphOrder")!;
 
 static bool IsTag(ReadOnlySpan<char> name)
@@ -36,7 +38,6 @@ int idCounter = sglyphorder.Elements()
 // Add flag glyphs' ids to Segoe's <GlyphOrder>
 foreach (var glyphord in tglyphorder.Elements()) {
     string oldName = glyphord.Attribute("name")!.Value;
-    var oldId = int.Parse(glyphord.Attribute("id")!.Value);
 
     // Don't redefine existing character ids
     if (oldName is ".notdef" or "space" || IsRegInd(oldName)) continue;
@@ -50,9 +51,25 @@ foreach (var glyphord in tglyphorder.Elements()) {
         new XAttribute("name", newName),
     ]));
 }
+// Add glyphs' ids from B&W font (but only flag glyphs)
+foreach (var glyphord in bwglyphorder.Elements()) {
+    string oldName = glyphord.Attribute("name")!.Value;
+
+    if (oldName is ".notdef" or "space" || oldName.StartsWith('u')) continue;
+
+    var newId = idCounter++;
+    string newName = oldName.StartsWith('u') ? oldName : $"flagglyph{nameId++:00000}";
+    mapBwNames[oldName] = newName;
+
+    sglyphorder.Add(new XElement("GlyphID", [
+        new XAttribute("id", newId),
+        new XAttribute("name", newName),
+    ]));
+}
 
 // Copy flag glyphs to Segoe's <glyf> (rename to avoid conflicts with Segoe)
 var tglyf = tdoc.Root!.Element("glyf")!;
+var bwglyf = bwdoc.Root!.Element("glyf")!;
 var sglyf = sdoc.Root!.Element("glyf")!;
 var sglyfCount = sglyf.Elements().Count();
 
@@ -66,8 +83,21 @@ foreach (var ttglyph in tglyf.Elements()) {
     clone.SetAttributeValue("name", name);
     sglyf.Add(clone);
 
-    if (clone.Element("component") is { } comp) {
+    foreach (var comp in clone.Elements("component")) {
         comp.SetAttributeValue("glyphName", mapNames[comp.Attribute("glyphName")!.Value]);
+    }
+}
+// Copy B&W glyphs (only flag glyphs)
+foreach (var ttglyph in bwglyf.Elements()) {
+    string name = ttglyph.Attribute("name")!.Value;
+    if (name is ".notdef" or "space" || name.StartsWith("u")) continue;
+
+    var clone = new XElement(ttglyph);
+    clone.SetAttributeValue("name", mapBwNames[name]);
+    sglyf.Add(clone);
+
+    foreach (var comp in clone.Elements("component")) {
+        comp.SetAttributeValue("glyphName", mapBwNames[comp.Attribute("glyphName")!.Value]);
     }
 }
 
@@ -75,12 +105,22 @@ foreach (var ttglyph in tglyf.Elements()) {
 
 // Copy flag glyphs' <mtx> metadata to Segoe's <hmtx>
 var thmtx = tdoc.Root!.Element("hmtx")!;
+var bwhmtx = bwdoc.Root!.Element("hmtx")!;
 var shmtx = sdoc.Root!.Element("hmtx")!;
 foreach (var mtx in thmtx.Elements()) {
     string? name = mapNames.TryGetValue(mtx.Attribute("name")!.Value, out var xx) ? xx : null;
     // Don't redefine existing character metrics
     if (name is null or ".notdef" or "space" ||
         shmtx.Elements().Any(x => x.Attribute("name")!.Value == name)) continue;
+
+    var clone = new XElement(mtx);
+    clone.SetAttributeValue("name", name);
+    shmtx.Add(clone);
+}
+// Copy metrics for B&W (only flag glyphs)
+foreach (var mtx in bwhmtx.Elements()) {
+    string? name = mapBwNames.TryGetValue(mtx.Attribute("name")!.Value, out var xx) ? xx : null;
+    if (name is null or ".notdef" or "space" || name.StartsWith("u")) continue;
 
     var clone = new XElement(mtx);
     clone.SetAttributeValue("name", name);
@@ -109,12 +149,14 @@ foreach (var smap in scmaps)
 
 
 
-// Copy flag glyphs' class defs to Segoe's <GDEF>
+// Copy flag glyphs' class defs to Segoe's <GDEF> (color and B&W glyphs)
 var sgdef = sdoc.Root!.Element("GDEF")!.Element("GlyphClassDef")!;
-foreach (var tGlyphName in mapNames.Values) {
-    if (sgdef.Elements().Any(x => x.Attribute("glyph")!.Value == tGlyphName)) continue;
+foreach (var glyphName in mapNames.Values.Concat(mapBwNames.Values)) {
+    if (sgdef.Elements().Any(x => x.Attribute("glyph")!.Value == glyphName)) continue;
+    if (glyphName.StartsWith('u')) continue; // don't add a class to simple codepoints
+
     var def = new XElement("ClassDef", [
-        new XAttribute("glyph", tGlyphName),
+        new XAttribute("glyph", glyphName),
         new XAttribute("class", "2"),
     ]);
     sgdef.Add(def);
@@ -310,12 +352,14 @@ foreach (var (glyph, layers) in tColorGlyphs) {
 
 // Copy flag glyphs' ligatures to Segoe's <GSUB>
 var slookups = sdoc.Root!.Element("GSUB")!.Element("LookupList")!;
+var bwlookups = bwdoc.Root!.Element("GSUB")!.Element("LookupList")!;
 var tlookups = tdoc.Root!.Element("GSUB")!.Element("LookupList")!;
 var lookupCounter = slookups.Elements().Count();
 
 var sCcmpFeature = sdoc.Root!.Element("GSUB")!.Element("FeatureList")!.Elements("FeatureRecord")
     .First(x => x.Element("FeatureTag")?.Attribute("value")!.Value == "ccmp")!.Element("Feature")!;
 
+List<XElement> addedLookups = [];
 foreach (var lookup in tlookups.Elements()) {
     lookup.Attribute("index")!.SetValue(lookupCounter++);
     foreach (var ligset in lookup.Elements("LigatureSubst").SelectMany(x => x.Elements("LigatureSet"))) {
@@ -332,7 +376,41 @@ foreach (var lookup in tlookups.Elements()) {
          ]));
     }
 
-    slookups.Add(new XElement(lookup));
+    var clone = new XElement(lookup);
+    slookups.Add(clone);
+    addedLookups.Add(clone);
+}
+
+foreach (var lookup in bwlookups.Elements()) {
+    foreach (var ligsub in lookup.Elements("LigatureSubst")) {
+        foreach (var ligset in ligsub.Elements("LigatureSet")) {
+            string ligStart = ligset.Attribute("glyph")!.Value;
+            foreach (var lig in ligset.Elements("Ligature")) {
+                string ligComponents = lig.Attribute("components")!.Value;
+                string ligGlyph = mapBwNames[lig.Attribute("glyph")!.Value];
+
+                var match = addedLookups.SelectMany(x => x.Elements("LigatureSubst"))
+                    .SelectMany(x => x.Elements("LigatureSet")).SelectMany(x => x.Elements("Ligature"))
+                    .First(x => x.Parent!.Attribute("glyph")!.Value == ligStart
+                        && x.Attribute("components")!.Value == ligComponents);
+
+                var colorLigGlyph = match.Attribute("glyph")!.Value;
+                // match.SetAttributeValue("glyph", ligGlyph);
+
+                // Color flags don't have proper glyf contours
+                var bwglyph = sglyf.Elements().First(x => x.Attribute("name")!.Value == ligGlyph);
+                var blankglyph = sglyf.Elements().First(x => x.Attribute("name")!.Value == colorLigGlyph);
+
+                // Replace color's blank glyph with B&W proper glyph
+                blankglyph.ReplaceNodes(bwglyph.Elements());
+                // Remove B&W glyph from everywhere else (color glyph now has both COLR and glyf data)
+                bwglyph.Remove();
+                sglyphorder.Elements().First(x => x.Attribute("name")!.Value == ligGlyph).Remove();
+                shmtx.Elements().First(x => x.Attribute("name")!.Value == ligGlyph).Remove();
+                sgdef.Elements().First(x => x.Attribute("glyph")!.Value == ligGlyph).Remove();
+            }
+        }
+    }
 }
 
 

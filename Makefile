@@ -54,6 +54,7 @@ MKBITMAP := $(call find_exe,mkbitmap)
 POTRACE := $(call find_exe,potrace)
 FONTTOOLS := $(call find_exe,fonttools)
 HB_VIEW := $(call find_exe,hb-view)
+7Z := $(call find_exe,7z)
 
 SVGO := $(call find_ps1,svgo)
 
@@ -61,11 +62,13 @@ SVGO := $(call find_ps1,svgo)
 CPU_CORES := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 
 # These are the only commands that should be run through the CLI
-.PHONY: build test test-vars clean rebuild
+.PHONY: build package test test-vars clean rebuild
 
 
 
 build: build/merged.ttf
+
+package: build/Segoe.UI.Emoji.with.Twemoji.Flags.zip
 
 FLAGS_PER_LINE ?= 16
 # Can be overriden with `make test FLAGS_PER_LINE=8`
@@ -76,7 +79,8 @@ test-vars:
 		NANOEMOJI=$(NANOEMOJI) INKSCAPE=$(INKSCAPE) \
 		MAGICK=$(MAGICK) MKBITMAP=$(MKBITMAP) POTRACE=$(POTRACE) \
 		FONTTOOLS=$(FONTTOOLS) HB_VIEW=$(HB_VIEW) \
-		SVGO="$(SVGO)" CPU_CORES=$(CPU_CORES)
+		7Z=$(7Z) SVGO="$(SVGO)" \
+		CPU_CORES=$(CPU_CORES)
 
 clean:
 	rm -rf build
@@ -216,6 +220,15 @@ build/merged.ttf: build/merged.ttx
 	@rm -f $@
 	@echo "Recompiling $@..."
 	@$(FONTTOOLS) ttx $<
+
+
+
+# Rename merged.ttf to this, and also make a .zip with it
+build/Segoe.UI.Emoji.with.Twemoji.Flags.ttf: build/merged.ttf
+	cp $< $@
+
+build/Segoe.UI.Emoji.with.Twemoji.Flags.zip: build/Segoe.UI.Emoji.with.Twemoji.Flags.ttf
+	$(7Z) a -tzip -mx=9 $@ $<
 
 
 

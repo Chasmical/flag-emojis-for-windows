@@ -158,13 +158,14 @@ The project's build process is pretty complicated and takes a long time (full ru
 - [ImageMagick](https://imagemagick.org/download/) for converting PNGs into BMPs,
 - [Potrace](https://potrace.sourceforge.net/#downloading) for tracing BMPs into single-color SVGs,
 - [HarfBuzz ≥14.2.0 (Apr 2026)](https://github.com/harfbuzz/harfbuzz/releases/latest) for font render tests,
+- [7z](https://www.7-zip.org) for packaging the font into a zip file,
 - And don't forget to update your `PATH`.
 
 > [!NOTE]
 > If you're on a Unix OS natively, you can run this to install all dependencies:
 > ```sh
 > sudo apt-get update
-> sudo apt-get install make git dotnet python3 nodejs npm inkscape imagemagick potrace
+> sudo apt-get install make git dotnet python3 nodejs npm inkscape imagemagick potrace p7zip-full
 > sudo pip install nanoemoji fonttools[lxml]
 > sudo npm install -g svgo
 > ```
@@ -175,6 +176,8 @@ The project's build process is pretty complicated and takes a long time (full ru
 After installing everything, you can run these Make commands (if you're on Windows, run them in WSL):
 
 - `make build` (default) builds the font (`build/merged.ttf`).
+
+- `make package` builds and then copies to `Segoe.UI.Emoji.with.Twemoji.Flags.{ttf,zip}`.
 
 - `make test-vars` prints the commands for the tools that will be used.
 

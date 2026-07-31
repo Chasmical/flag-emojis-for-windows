@@ -223,12 +223,13 @@ build/merged.ttf: build/merged.ttx
 
 
 
-# Rename merged.ttf to this, and also make a .zip with it
+# Rename merged.ttf to this, and package it into a zip
 build/Segoe.UI.Emoji.with.Twemoji.Flags.ttf: build/merged.ttf
 	cp $< $@
 
 build/Segoe.UI.Emoji.with.Twemoji.Flags.zip: build/Segoe.UI.Emoji.with.Twemoji.Flags.ttf
-	$(7Z) a -tzip -mx=9 $@ $<
+	rm -f $@
+	cd $(<D) && $(7Z) a -tzip -mx=9 $(@F) $(<F)
 
 
 

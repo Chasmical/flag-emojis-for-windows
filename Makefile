@@ -114,9 +114,9 @@ build/jdecked-twemoji/.git/HEAD:
 	@$(GIT) sparse-checkout set --no-cone /assets/svg
 	@$(GIT) -c advice.detachedHead=false checkout origin/main
 
-# Use the script to find all flag glyphs in jdecked/twemoji
+# Use the script to find all flag glyphs (and new 17.0 emojis) in jdecked/twemoji
 build/glyph-paths.txt: scripts/find_flag_glyphs.cs build/jdecked-twemoji/.git/HEAD
-	@$(DOTNET) $< >$@.tmp && mv $@.tmp $@
+	@$(DOTNET) $< --with-new-17.0 >$@.tmp && mv $@.tmp $@
 
 
 
@@ -225,11 +225,11 @@ build/merged.ttf: build/merged.ttx
 
 # Rename merged.ttf to this, and package it into a zip
 build/Segoe.UI.Emoji.with.Twemoji.Flags.ttf: build/merged.ttf
-	cp $< $@
+	@cp $< $@
 
 build/Segoe.UI.Emoji.with.Twemoji.Flags.zip: build/Segoe.UI.Emoji.with.Twemoji.Flags.ttf
-	rm -f $@
-	cd $(<D) && $(7Z) a -tzip -mx=9 $(@F) $(<F)
+	@rm -f $@
+	@cd $(<D) && $(7Z) a -tzip -mx=9 $(@F) $(<F)
 
 
 

@@ -27,11 +27,11 @@ var bwglyphorder = bwdoc.Root!.Element("GlyphOrder")!;
 var sglyphorder = sdoc.Root!.Element("GlyphOrder")!;
 
 static bool IsTag(ReadOnlySpan<char> name)
-    => name.StartsWith('u') && Convert.ToUInt32(name[1..].ToString(), 16)
-    is (>= 0xE0061 and <= 0xE007A);
+    => name.StartsWith('u') && int.TryParse(name[1..], NumberStyles.HexNumber, null, out var cp)
+    && cp is (>= 0xE0061 and <= 0xE007A);
 static bool IsRegInd(ReadOnlySpan<char> name)
-    => name.StartsWith('u') && Convert.ToUInt32(name[1..].ToString(), 16)
-    is 0x1f3f4 or (>= 0x1f1e6 and <= 0x1f1ff);
+    => name.StartsWith('u') && int.TryParse(name[1..], NumberStyles.HexNumber, null, out var cp)
+    && cp is 0x1f3f4 or (>= 0x1f1e6 and <= 0x1f1ff);
 
 int idCounter = sglyphorder.Elements()
     .Select(n => (int)n.Attribute("id")!).Max() + 1;
@@ -42,21 +42,24 @@ foreach (var glyphord in tglyphorder.Elements()) {
 
     // Don't redefine existing character ids
     if (oldName is ".notdef" or "space" || IsRegInd(oldName)) continue;
+    if (oldName.StartsWith('u') && sglyphorder.Elements().Any(x => x.Attribute("name")!.Value == oldName)) continue;
 
     var newId = idCounter++;
     string newName = oldName.StartsWith('u') ? oldName : $"flagglyph{nameId++:00000}";
     mapNames[oldName] = newName;
+    if (oldName.StartsWith('u')) mapBwNames[oldName] = newName;
 
     sglyphorder.Add(new XElement("GlyphID", [
         new XAttribute("id", newId),
         new XAttribute("name", newName),
     ]));
 }
-// Add glyphs' ids from B&W font (but only flag glyphs)
+// Add glyphs' ids from B&W font (but not RIS or tags)
 foreach (var glyphord in bwglyphorder.Elements()) {
     string oldName = glyphord.Attribute("name")!.Value;
 
-    if (oldName is ".notdef" or "space" || oldName.StartsWith('u')) continue;
+    if (oldName is ".notdef" or "space" || IsRegInd(oldName) || IsTag(oldName)) continue;
+    if (oldName.StartsWith('u') && sglyphorder.Elements().Any(x => x.Attribute("name")!.Value == oldName)) continue;
 
     var newId = idCounter++;
     string newName = oldName.StartsWith('u') ? oldName : $"flagglyph{nameId++:00000}";
@@ -91,14 +94,20 @@ foreach (var ttglyph in tglyf.Elements()) {
 // Copy B&W glyphs (only flag glyphs)
 foreach (var ttglyph in bwglyf.Elements()) {
     string name = ttglyph.Attribute("name")!.Value;
-    if (name is ".notdef" or "space" || name.StartsWith("u")) continue;
+    if (name is ".notdef" or "space" || IsRegInd(name) || IsTag(name)) continue;
+    name = mapBwNames[name];
 
     var clone = new XElement(ttglyph);
-    clone.SetAttributeValue("name", mapBwNames[name]);
+    clone.SetAttributeValue("name", name);
     sglyf.Add(clone);
 
     foreach (var comp in clone.Elements("component")) {
         comp.SetAttributeValue("glyphName", mapBwNames[comp.Attribute("glyphName")!.Value]);
+    }
+
+    if (name.StartsWith('u')) {
+        var color = sglyf.Elements().FirstOrDefault(x => x.Attribute("name")!.Value == name);
+        color?.Remove();
     }
 }
 
@@ -121,7 +130,7 @@ foreach (var mtx in thmtx.Elements()) {
 // Copy metrics for B&W (only flag glyphs)
 foreach (var mtx in bwhmtx.Elements()) {
     string? name = mapBwNames.TryGetValue(mtx.Attribute("name")!.Value, out var xx) ? xx : null;
-    if (name is null or ".notdef" or "space" || name.StartsWith("u")) continue;
+    if (name is null or ".notdef" or "space" || IsTag(name) || IsRegInd(name)) continue;
 
     var clone = new XElement(mtx);
     clone.SetAttributeValue("name", name);
@@ -396,7 +405,6 @@ foreach (var lookup in bwlookups.Elements()) {
                         && x.Attribute("components")!.Value == ligComponents);
 
                 var colorLigGlyph = match.Attribute("glyph")!.Value;
-                // match.SetAttributeValue("glyph", ligGlyph);
 
                 // Color flags don't have proper glyf contours
                 var bwglyph = sglyf.Elements().First(x => x.Attribute("name")!.Value == ligGlyph);
@@ -420,8 +428,7 @@ foreach (var lookup in bwlookups.Elements()) {
 // as a workaround for VSCode's xterm.js terminal (see issue #13).
 foreach (var mtx in shmtx.Elements()) {
     string name = mtx.Attribute("name")!.Value;
-    if (name.StartsWith('u') && int.TryParse(name[1..], NumberStyles.HexNumber, null, out var cp)
-        && cp is >= 0x1f1e6 and <= 0x1f1ff) {
+    if (IsRegInd(name)) {
         mtx.SetAttributeValue("width", 1406); // half of flag width
     }
 }

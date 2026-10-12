@@ -36,3 +36,10 @@ if (args.Length > 0 && args[0] == "--with-new-17.0") {
         Console.Write($"build/jdecked-twemoji/assets/svg/{cp}.svg\n");
     }
 }
+// Add 17.0 emojis extracted from Segoe UI Emoji 1.70 (atm, they're not tracked in the repo)
+if (args.Length > 0 && args[0] == "--with-new-17.0-temp") {
+	string[] codepoints = ["1faea", "1faef", "1fac8", "1facd", "1f6d8", "1fa8a", "1fa8e"];
+    foreach (string cp in codepoints) {
+        Console.Write($"temp-17.0-emojis/{cp}.svg\n");
+    }
+}

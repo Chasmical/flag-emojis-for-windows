@@ -487,5 +487,12 @@ foreach (var mtx in shmtx.Elements()) {
 
 
 
+// TODO: pretend this 1.60 font is actually 1.70.
+// (see https://github.com/Chasmical/flag-emojis-for-windows/issues/3)
+var fontRevision = sdoc.Root!.Element("head")!.Element("fontRevision")!;
+fontRevision.SetAttributeValue("value", "1.7");
+
+
+
 sdoc.Save(saveAs);
 Console.WriteLine("Done!");

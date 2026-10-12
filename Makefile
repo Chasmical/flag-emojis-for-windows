@@ -102,7 +102,13 @@ rebuild: clean
 # Get the seguiemj.ttf from C:\Windows\Fonts
 build/seguiemj.ttf:
 	@mkdir -p $(@D)
-	@pwsh.exe -nop -c "cp C:\Windows\Fonts\seguiemj.ttf $@.tmp"
+
+# TODO: for now we'll use old 1.60 instead of latest 1.70 due to glyph count limits.
+# (see https://github.com/Chasmical/flag-emojis-for-windows/issues/3)
+#
+#	@pwsh.exe -nop -c "cp C:\Windows\Fonts\seguiemj.ttf $@.tmp"
+	@cp build/seguiemj-1.60.ttf $@.tmp
+
 	@cmp -s $@.tmp $@ && rm $@.tmp || mv $@.tmp $@
 
 # Clone the jdecked/twemoji repository
@@ -117,7 +123,7 @@ build/jdecked-twemoji/.git/HEAD:
 
 # Use the script to find all flag glyphs (and new 17.0 emojis) in jdecked/twemoji
 build/glyph-paths.txt: scripts/find_flag_glyphs.cs build/jdecked-twemoji/.git/HEAD
-	@$(DOTNET) $< --with-new-17.0 >$@.tmp && mv $@.tmp $@
+	@$(DOTNET) $< --with-new-17.0-temp >$@.tmp && mv $@.tmp $@
 
 
 

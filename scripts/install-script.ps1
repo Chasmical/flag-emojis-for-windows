@@ -54,6 +54,7 @@ function DownloadFile($url, $target) {
         $buffer = [byte[]]::new(1MB)
         $read = $responseStream.Read($buffer, 0, $buffer.Length)
         $totalRead = $read
+        $activity = "Downloading $($url.Split('/')[-1])"
 
         while ($read -gt 0) {
             $targetStream.Write($buffer, 0, $read)
@@ -61,14 +62,14 @@ function DownloadFile($url, $target) {
             $totalRead += $read
 
             $progress = @{
-                Activity        = "Downloading $($url.Split('/')[-1])"
+                Activity        = $activity
                 Status          = "Downloaded ($(FormatBytes $totalRead) of $(FormatBytes $totalLength)):"
                 # If Content-Length header was not available, then pass -1 for unknown progress
                 PercentComplete = (-1, ($totalRead / [float]$totalLength * 100))[$totalLength -gt 0]
             }
             Write-Progress @progress
         }
-        Write-Progress -Completed
+        Write-Progress -Activity $activity -Completed
     }
     finally {
         if ($responseStream) { $responseStream.Dispose() }

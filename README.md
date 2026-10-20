@@ -7,14 +7,14 @@
     <a href="https://github.com/Chasmical/flag-emojis-for-windows/releases">
       <img src="https://img.shields.io/github/downloads/Chasmical/flag-emojis-for-windows/total?label=Downloads&style=flat" alt="Downloads"/>
     </a>
-    <a href="https://github.com/Chasmical/flag-emojis-for-windows/subscription">
-      <img src="https://img.shields.io/github/watchers/Chasmical/flag-emojis-for-windows?color=green&label=Watchers&style=flat" alt="Watchers"/>
-    </a>
     <a href="https://github.com/Chasmical/flag-emojis-for-windows/stargazers">
       <img src="https://img.shields.io/github/stars/Chasmical/flag-emojis-for-windows?color=green&label=Stars&style=flat" alt="Stars"/>
     </a>
+    <a href="https://github.com/Chasmical/flag-emojis-for-windows/subscription">
+      <img src="https://img.shields.io/github/watchers/Chasmical/flag-emojis-for-windows?color=green&label=Watchers&style=flat" alt="Watchers"/>
+    </a>
     <a href="https://chsm.dev/blog/2026/08/27/flag-emojis-for-windows-8-11-reworked">
-      <img src="https://img.shields.io/badge/Bringing%20flag%20emojis%20to%20Windows%2011-link?style=flat&label=read%20my%20blog" alt="Read my blog"/>
+      <img src="https://img.shields.io/badge/Flag%20Emojis%20for%20Windows%208--11%20Reworked-link?style=flat&label=my%20blog" alt="Read my blog"/>
     </a>
   </p>
 </div>
@@ -31,33 +31,7 @@ And now you too can say *"No!"* to Windows, *"I want the flag emojis that everyo
 
 &nbsp;
 
-This font is based on Segoe UI Emoji v1.60 ([3D Fluent 16.0](https://emojipedia.org/microsoft-3D-fluent/fluent-16.0); Win11 25H2; 2025-08-29) and contains 262 flags and 7 new 17.0 emojis from Twemoji v17.0.3 ([`jdecked/twemoji`](https://github.com/jdecked/twemoji)@[`b6b55fe`](https://github.com/jdecked/twemoji/commit/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b) 2026-06-01). You can build it yourself, if you'd like (see the "How to build it yourself" section in the end).
-
-
-
-## Latest update v2.2.0 (22 Aug 2026)
-
-- 🛟 Added COLRv1 data for font engines that know COLRv1, but not v0 (see [#16](https://github.com/Chasmical/flag-emojis-for-windows/issues/16)).
-- 🐛 Fixed the advance width of `🏴`, which was accidentally halved in a fix for [#13](https://github.com/Chasmical/flag-emojis-for-windows/issues/13).
-
-## Minor update v2.1.0 (31 Jul 2026)
-
-- 🔨 Remade the entire build process with Make.
-- 📸 **Now includes new 17.0 emojis that aren't yet in Fluent 3D (see [#10](https://github.com/Chasmical/flag-emojis-for-windows/issues/10)).**
-- 🔳 **Added black-and-white rendering support for older apps (see [#12](https://github.com/Chasmical/flag-emojis-for-windows/issues/12)).**
-- 🔧 A partial fix for rendering in VSCode's xterm.js terminal (see [#13](https://github.com/Chasmical/flag-emojis-for-windows/issues/13)).
-- ⚡️ Optimized the assets with SVGO, and upgraded build scripts API.
-
-<img src="./img/upd-bw-glyphs.png" />
-
-## Major update v2.0.0 (6 Jul 2026)
-
-- ✨ **Added support for COLRv0 rendering! Now works on Windows 8-10 too.**
-- 💚 Now compiled with the emojis directly from [`jdecked/twemoji`](https://github.com/jdecked/twemoji) repository.
-- ⚡️ Removed unnecessary SVG table, decreasing the font's size from 13.1 to 12.1 MB.
-- 📏 Fixed the relative width and size of the emojis. Now they're the same size as others.
-
-<img src="./img/upd-flag-width.png" width="399" />
+This font is based on Segoe UI Emoji v1.70 ([3D Fluent 17.0](https://emojipedia.org/microsoft-3D-fluent/windows-11-26h2-august-2026-update); Win11 26H2; 2026-08-27) and contains 262 flags from Twemoji v17.0.3 ([`jdecked/twemoji`](https://github.com/jdecked/twemoji)@[`b6b55fe`](https://github.com/jdecked/twemoji/commit/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b) 2026-06-01). You can build it yourself, if you'd like (see the "How to build it yourself" section in the end).
 
 
 
@@ -68,7 +42,7 @@ This font is based on Segoe UI Emoji v1.60 ([3D Fluent 16.0](https://emojipedia.
 3. [Similar projects & comparison](#similar-projects--comparison)
 4. [How to build it yourself](#how-to-build-it-yourself)
 
-Also, you can read my two blog posts on this project!
+Also, you can read my two blog posts on this project:
 
 - 23-Sep-2025, v1: [Bringing flag emojis to Windows 11](https://chsm.dev/blog/2025/09/23/bringing-flag-emojis-to-windows-11)
 - 27-Aug-2026, v2: [Flag Emojis for Windows 8-11 Reworked](https://chsm.dev/blog/2026/08/27/flag-emojis-for-windows-8-11-reworked)
@@ -97,17 +71,26 @@ The installer script compares your font's SHA256 checksum with the latest one be
 
 
 
-### If both installation methods fail, please [open an issue](https://github.com/Chasmical/flag-emojis-for-windows/issues/new/choose)!
+### If both installation methods fail, check the [Troubleshooting Guide](./TROUBLESHOOTING.md)!
 
 
 
-#### Uninstalling (if installed for all users)
+### Uninstalling for all users
 
-Recover the original Segoe UI Emoji file: `Copy-Item "C:\Windows\Fonts\seguiemj.ttf"`, and install it for all users.
+Open Terminal (PowerShell) and run this command to recover the original Segoe UI Emoji file:
 
-#### Uninstalling (if installed for current user)
+```sh
+Copy-Item "C:\Windows\Fonts\seguiemj.ttf" "~\Desktop"
+```
 
-Go to Settings > Personalization > Fonts, and find and select Segoe UI Emoji in the list. In the Metadata section, find the font file that you installed. Press the "Uninstall" button, and restart your PC.
+This will copy the original font file to your desktop. Install it with "Install for all users",
+and then restart your PC.
+
+### Uninstalling for this user
+
+Simply go to "Settings > Personalization > Fonts", find and click on "Segoe UI Emoji", select the
+font file with the longest path and press "Uninstall". You should still have the original font file
+installed system-wide in there.
 
 
 
@@ -153,7 +136,7 @@ Country flags are uncolored in the Explorer, but so are the Fluent 3D emojis. So
 
 ## Similar projects & comparison
 
-- [`perguto/Country-Flag-Emojis-for-Windows`](https://github.com/perguto/Country-Flag-Emojis-for-Windows) replaces Segoe UI Emoji with Google's Noto Color Emoji.
+- [`perguto/Country-Flag-Emojis-for-Windows`](https://github.com/perguto/Country-Flag-Emojis-for-Windows) replaces Segoe UI Emoji with Google Noto emojis.
 
 - [`quarrel/broken-flag-emojis-win11-twemoji`](https://github.com/quarrel/broken-flag-emojis-win11-twemoji) replaces Segoe UI Emoji with Twemoji emojis.
 
@@ -231,4 +214,5 @@ You can also read my two blog posts explaining some of the details:
 
 - 23-Sep-2025, v1: [Bringing flag emojis to Windows 11](https://chsm.dev/blog/2025/09/23/bringing-flag-emojis-to-windows-11)
 - 27-Aug-2026, v2: [Flag Emojis for Windows 8-11 Reworked](https://chsm.dev/blog/2026/08/27/flag-emojis-for-windows-8-11-reworked)
+
 
